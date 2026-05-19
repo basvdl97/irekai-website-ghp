@@ -1,0 +1,1750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content="IREKAI — Post-quantum cryptography consulting, assessments, and tools."/>
+<title>IREKAI — Post-Quantum Security</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,700;1,9..144,400;1,9..144,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- Vue 3 + Vue Router via CDN (loaded by your browser, not this server) -->
+<script src="https://unpkg.com/vue@3.4.21/dist/vue.global.prod.js"></script>
+<script src="https://unpkg.com/vue-router@4.3.0/dist/vue-router.global.prod.js"></script>
+<style>
+/* ─── Design System ─────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0c0a09;--surface:#1c1917;--surface2:#292524;
+  --border:rgba(41,37,36,0.9);--border-dim:rgba(41,37,36,0.5);
+  --text:#e7e5e4;--text-muted:#a8a29e;--text-dim:#78716c;
+  --teal:#2dd4bf;--teal-soft:rgba(45,212,191,0.08);--teal-glow:rgba(45,212,191,0.35);
+  --sage:#7aad97;--sage-soft:rgba(122,173,151,0.08);
+  --amber:#fbbf24;--violet:#a78bfa;--fuchsia:#e879f9;--emerald:#34d399;
+  --fd:'Fraunces',Georgia,serif;--fg:'Cormorant Garamond',Georgia,serif;--fm:'JetBrains Mono',monospace;--fs:ui-sans-serif,system-ui,sans-serif;
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{background:var(--bg);color:var(--text);font-family:var(--fs);min-height:100vh;-webkit-font-smoothing:antialiased}
+.grid-bg{background-image:radial-gradient(circle at 1px 1px,rgba(231,229,228,0.055) 1px,transparent 0);background-size:22px 22px}
+.fd{font-family:var(--fd)} .fm{font-family:var(--fm)}
+.container{max-width:1180px;margin:0 auto;padding:0 1.5rem}
+@media(min-width:768px){.container{padding:0 2.5rem}}
+a{color:inherit;text-decoration:none}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:3px}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--fm);font-size:.75rem;letter-spacing:.04em;padding:.6rem 1.2rem;border-radius:6px;border:1px solid;cursor:pointer;transition:all .2s;text-decoration:none}
+.btn-teal{background:rgba(45,212,191,.1);border-color:rgba(45,212,191,.4);color:var(--teal)}
+.btn-teal:hover{background:rgba(45,212,191,.18);border-color:rgba(45,212,191,.7);box-shadow:0 0 20px -5px var(--teal-glow)}
+.btn-sage{background:rgba(122,173,151,.1);border-color:rgba(122,173,151,.4);color:#7aad97}
+.btn-sage:hover{background:rgba(122,173,151,.18);border-color:rgba(122,173,151,.7);box-shadow:0 0 18px -5px rgba(122,173,151,.4)}
+.btn-ghost{background:transparent;border-color:var(--border);color:var(--text-muted)}
+.btn-ghost:hover{border-color:var(--text-dim);color:var(--text)}
+
+/* ── Badge ── */
+.badge{display:inline-flex;align-items:center;font-family:var(--fm);font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;padding:.22rem .6rem;border-radius:4px;border:1px solid}
+.badge-teal{background:rgba(45,212,191,.1);color:var(--teal);border-color:rgba(45,212,191,.3)}
+.badge-amber{background:rgba(251,191,36,.1);color:var(--amber);border-color:rgba(251,191,36,.3)}
+.badge-violet{background:rgba(167,139,250,.1);color:var(--violet);border-color:rgba(167,139,250,.3)}
+.badge-fuchsia{background:rgba(232,121,249,.1);color:var(--fuchsia);border-color:rgba(232,121,249,.3)}
+
+.section-label{font-family:var(--fm);font-size:.62rem;letter-spacing:.25em;text-transform:uppercase;color:var(--text-dim)}
+
+/* ── Navbar ── */
+#navbar{position:sticky;top:0;z-index:100;transition:background .2s,border-color .2s,backdrop-filter .2s;border-bottom:1px solid transparent}
+#navbar.scrolled{background:rgba(12,10,9,.88);backdrop-filter:blur(12px);border-bottom-color:var(--border)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:60px}
+.nav-logo{display:flex;align-items:center;gap:.6rem}
+.nav-logo svg{width:26px;height:26px}
+.nav-logo-name{font-family:var(--fd);font-size:1rem;letter-spacing:.18em;color:var(--text)}
+.nav-links{display:none;align-items:center;gap:.2rem}
+@media(min-width:768px){.nav-links{display:flex}}
+.nav-link{font-family:var(--fm);font-size:.72rem;letter-spacing:.04em;color:var(--text-muted);padding:.38rem .7rem;border-radius:6px;background:transparent;border:none;cursor:pointer;transition:color .15s,background .15s;text-decoration:none}
+.nav-link:hover,.nav-link.active{color:var(--text);background:rgba(255,255,255,.05)}
+.nav-cta{margin-left:.4rem}
+/* dropdown */
+.nav-dd{position:relative}
+.dd-trigger{display:flex;align-items:center;gap:.3rem}
+.dd-menu{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(-4px);min-width:260px;background:#1a1714;border:1px solid var(--border);border-radius:10px;padding:.35rem;box-shadow:0 16px 48px rgba(0,0,0,.5);opacity:0;visibility:hidden;transition:opacity .15s,transform .15s}
+.dd-menu.open{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
+.dd-chevron{width:10px;height:10px;transition:transform .2s}
+.dd-chevron.open{transform:rotate(180deg)}
+.dd-item{display:flex;align-items:center;gap:.6rem;padding:.5rem .7rem;border-radius:6px;font-family:var(--fm);font-size:.7rem;color:var(--text-muted);transition:background .15s,color .15s;cursor:pointer;border:none;background:transparent;width:100%;text-align:left}
+.dd-item:hover{background:rgba(255,255,255,.06);color:var(--text)}
+.dd-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+/* burger */
+.burger{display:flex;flex-direction:column;justify-content:space-between;width:22px;height:14px;background:transparent;border:none;cursor:pointer;padding:0}
+@media(min-width:768px){.burger{display:none}}
+.burger span{display:block;height:1.5px;background:var(--text-muted);border-radius:2px;transition:all .25s ease;transform-origin:center}
+.burger.open span:nth-child(1){transform:translateY(6.25px) rotate(45deg)}
+.burger.open span:nth-child(2){opacity:0;transform:scaleX(0)}
+.burger.open span:nth-child(3){transform:translateY(-6.25px) rotate(-45deg)}
+/* mobile menu */
+.mobile-menu{display:none;flex-direction:column;padding:.75rem 1.5rem 1.25rem;border-bottom:1px solid var(--border);background:rgba(12,10,9,.97);backdrop-filter:blur(12px)}
+.mobile-menu.open{display:flex}
+@media(min-width:768px){.mobile-menu{display:none !important}}
+.mob-label{font-family:var(--fm);font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-dim);margin:.25rem 0 .4rem}
+.mob-link{font-family:var(--fm);font-size:.8rem;color:var(--text-muted);padding:.55rem .4rem;border-radius:6px;transition:color .15s;cursor:pointer;display:flex;align-items:center;gap:.5rem;border:none;background:transparent;width:100%;text-align:left}
+.mob-link:hover{color:var(--text)}
+.mob-link::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--border);flex-shrink:0}
+.mob-link.teal-link{color:var(--teal)}
+.mob-divider{border:none;border-top:1px solid var(--border);margin:.4rem 0}
+
+/* ── Footer ── */
+.site-footer{border-top:1px solid var(--border);margin-top:6rem}
+.footer-inner{display:flex;flex-direction:column;gap:2.5rem;padding:3rem 0}
+@media(min-width:640px){.footer-inner{flex-direction:row;justify-content:space-between;align-items:flex-start}}
+.footer-brand{display:flex;flex-direction:column;gap:1rem}
+.footer-logo-row{display:flex;align-items:center;gap:.6rem}
+.footer-logo-row svg{width:24px;height:24px}
+.footer-logo-name{font-family:var(--fd);font-size:.95rem;letter-spacing:.18em;color:var(--text)}
+.footer-tagline{font-family:var(--fm);font-size:.68rem;line-height:1.6;color:var(--text-dim);letter-spacing:.04em}
+.footer-nav{display:grid;grid-template-columns:1fr 1fr;gap:2rem}
+.footer-nav-col{display:flex;flex-direction:column;gap:.55rem}
+.footer-nav-label{font-family:var(--fm);font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.2rem}
+.footer-link{font-family:var(--fm);font-size:.7rem;color:var(--text-muted);transition:color .15s;cursor:pointer}
+.footer-link:hover{color:var(--text)}
+.footer-bottom{border-top:1px solid var(--border-dim);padding:1rem 0}
+.footer-bottom-inner{display:flex;justify-content:space-between;align-items:center}
+.footer-copy{font-family:var(--fm);font-size:.62rem;color:var(--text-dim);letter-spacing:.08em}
+
+/* ── Page transition ── */
+.v-enter-active,.v-leave-active{transition:opacity .22s ease,transform .22s ease}
+.v-enter-from{opacity:0;transform:translateY(8px)}
+.v-leave-to{opacity:0;transform:translateY(-4px)}
+
+/* ══════════════════════════════════════════════════════════════
+   HOME PAGE — IREMIA+IKIGAI → IREKAI animation (looping)
+══════════════════════════════════════════════════════════════ */
+.hero-section{min-height:100svh;display:flex;align-items:center;justify-content:center;padding:2rem 1.5rem;position:relative;overflow:hidden}
+.hero-center{display:flex;flex-direction:column;align-items:center;gap:1.6rem;text-align:center;padding-top:210px;position:relative}
+/* Seal */
+.seal-area{position:absolute;top:8px;left:50%;transform:translateX(-50%) translateY(10px) scale(.88);opacity:0;transition:opacity .55s ease,transform .65s cubic-bezier(.2,0,.2,1)}
+.seal-area.visible{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}
+.seal-rect-outer{stroke-dasharray:576;stroke-dashoffset:576}
+.seal-area.drawing .seal-rect-outer{animation:drawStroke 1.1s cubic-bezier(.4,0,.2,1) 0s forwards}
+.seal-corners{opacity:0}
+.seal-area.drawing .seal-corners{animation:fadeInEl .4s ease .9s forwards}
+.seal-lattice{opacity:0}
+.seal-area.drawing .seal-lattice{animation:fadeInEl .5s ease .85s forwards}
+.seal-rect-inner{stroke-dasharray:256;stroke-dashoffset:256}
+.seal-area.drawing .seal-rect-inner{animation:drawStroke .6s cubic-bezier(.4,0,.2,1) 1.0s forwards}
+.seal-axes{opacity:0}
+.seal-area.drawing .seal-axes{animation:fadeInEl .35s ease 1.4s forwards}
+.seal-ring{stroke-dasharray:41;stroke-dashoffset:41}
+.seal-area.drawing .seal-ring{animation:drawStroke .35s ease 1.55s forwards}
+.seal-dot{transform-origin:100px 100px;transform:scale(0)}
+.seal-area.drawing .seal-dot{animation:dotPop .28s cubic-bezier(.2,0,.2,1) 1.85s forwards}
+@keyframes drawStroke{to{stroke-dashoffset:0}}
+@keyframes fadeInEl{to{opacity:1}}
+@keyframes dotPop{to{transform:scale(1)}}
+/* Name row */
+.name-area{display:flex;align-items:center;justify-content:center;font-family:var(--fg);font-weight:500;font-size:clamp(72px,9.5vw,120px);text-transform:uppercase;line-height:1;white-space:nowrap;letter-spacing:.04em}
+.lw{display:block;overflow:hidden;max-width:1.2em;transition:max-width .52s cubic-bezier(.4,0,.2,1) .22s,opacity .22s ease 0s}
+.lt{display:block;padding:0 .06em;opacity:0;color:var(--text);transition:opacity .28s ease}
+.lw.visible .lt{opacity:1}
+.lw.fade.dimmed .lt{opacity:.13}
+.lw.collapse{max-width:0}
+.lw.collapse .lt{opacity:0}
+.lw.spacer{max-width:8em;display:flex;align-items:center;justify-content:center;transition:max-width .44s cubic-bezier(.4,0,.2,1) .04s,opacity .22s ease 0s}
+.spacer-line{display:block;width:1px;height:.6em;background:var(--text-dim);opacity:0;flex-shrink:0;transition:opacity .5s ease}
+.spacer-line.visible{opacity:.55}
+/* Below area */
+.below-area{position:relative;margin-top:32px;min-height:52px;width:100%;display:flex;align-items:flex-start;justify-content:center}
+.labels-row{position:absolute;display:flex;gap:clamp(44px,6.5vw,88px);align-items:flex-start;opacity:0;transition:opacity .5s ease}
+.labels-row.visible{opacity:1}
+.word-label{display:flex;flex-direction:column;align-items:center;gap:5px}
+.lbl-glyph{font-family:var(--fg);font-weight:400;font-size:clamp(17px,2.2vw,26px);color:#7aad97;opacity:.72;letter-spacing:.03em}
+.lbl-meaning{font-family:var(--fm);font-weight:300;font-size:clamp(9px,1.1vw,13px);letter-spacing:.2em;text-transform:uppercase;color:var(--text-dim);opacity:.55}
+.hero-tagline{position:absolute;font-family:var(--fg);font-style:italic;font-weight:300;font-size:clamp(16px,2vw,22px);color:var(--text-muted);letter-spacing:.01em;opacity:0;text-align:center;transition:opacity .6s ease}
+.hero-tagline.visible{opacity:1}
+
+/* Products grid */
+.products-section{padding:5rem 0 6rem}
+.section-head{display:flex;flex-direction:column;gap:1rem;margin-bottom:3rem}
+.section-title{font-family:var(--fd);font-size:clamp(1.8rem,4vw,2.8rem);font-weight:500;line-height:1.15;color:var(--text)}
+.section-sub{font-size:.95rem;line-height:1.7;color:var(--text-muted);max-width:56ch}
+.products-grid{display:grid;grid-template-columns:1fr;gap:1.25rem}
+@media(min-width:640px){.products-grid{grid-template-columns:1fr 1fr}}
+@media(min-width:1024px){.products-grid{grid-template-columns:1fr 1fr 1fr;grid-template-rows:auto auto}}
+@media(min-width:1024px){.product-card--featured{grid-column:span 2}}
+/* Card */
+.product-card{display:flex;flex-direction:column;gap:1rem;padding:1.75rem;border-radius:14px;border:1px solid var(--border);background:rgba(28,25,23,.5);cursor:pointer;transition:border-color .2s,background .2s,box-shadow .2s,transform .2s;position:relative;overflow:hidden}
+.product-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at top left,var(--cg,transparent) 0%,transparent 70%);pointer-events:none;opacity:0;transition:opacity .3s}
+.product-card:hover::before{opacity:1}
+.product-card:hover{transform:translateY(-2px)}
+.pc-sage{--cg:rgba(122,173,151,.08)}
+.pc-sage:hover{border-color:rgba(122,173,151,.45);box-shadow:0 8px 40px -12px rgba(122,173,151,.25)}
+.pc-teal{--cg:rgba(45,212,191,.08)}
+.pc-teal:hover{border-color:rgba(45,212,191,.45);box-shadow:0 8px 40px -12px rgba(45,212,191,.25)}
+.pc-amber{--cg:rgba(251,191,36,.08)}
+.pc-amber:hover{border-color:rgba(251,191,36,.45);box-shadow:0 8px 40px -12px rgba(251,191,36,.2)}
+.pc-violet{--cg:rgba(167,139,250,.08)}
+.pc-violet:hover{border-color:rgba(167,139,250,.45);box-shadow:0 8px 40px -12px rgba(167,139,250,.2)}
+.pc-fuchsia{--cg:rgba(232,121,249,.08)}
+.pc-fuchsia:hover{border-color:rgba(232,121,249,.45);box-shadow:0 8px 40px -12px rgba(232,121,249,.2)}
+.card-icon{width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--ic,var(--text-muted));flex-shrink:0}
+.card-icon svg{width:20px;height:20px}
+.card-title{font-family:var(--fd);font-size:1.1rem;font-weight:500;color:var(--text);line-height:1.3}
+.product-card--featured .card-title{font-size:1.35rem}
+.card-desc{font-size:.875rem;line-height:1.7;color:var(--text-muted);flex:1}
+.card-tags{display:flex;flex-wrap:wrap;gap:.4rem}
+.tag{font-family:var(--fm);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;padding:.18rem .5rem;border-radius:4px;border:1px solid var(--border);color:var(--text-dim)}
+.card-cta{font-family:var(--fm);font-size:.72rem;letter-spacing:.04em;color:var(--ic,var(--text-muted));display:flex;align-items:center;gap:.35rem;margin-top:.25rem}
+.card-cta .arr{transition:transform .15s}
+.product-card:hover .arr{transform:translateX(4px)}
+
+/* Why section */
+.why-section{padding:4rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.why-grid{display:grid;grid-template-columns:1fr;gap:2rem}
+@media(min-width:640px){.why-grid{grid-template-columns:1fr 1fr}}
+@media(min-width:1024px){.why-grid{grid-template-columns:repeat(4,1fr)}}
+.why-item{display:flex;flex-direction:column;gap:.85rem}
+.why-icon{width:32px;height:32px;color:var(--sage);opacity:.8}
+.why-icon svg{width:100%;height:100%}
+.why-title{font-family:var(--fd);font-size:1rem;color:var(--text);margin-bottom:.2rem}
+.why-body{font-size:.85rem;line-height:1.7;color:var(--text-muted)}
+/* CTA banner */
+.cta-section{padding:5rem 0}
+.cta-inner{display:flex;flex-direction:column;gap:2rem;align-items:flex-start}
+@media(min-width:768px){.cta-inner{flex-direction:row;align-items:center;justify-content:space-between}}
+.cta-actions{display:flex;flex-wrap:wrap;gap:.75rem;flex-shrink:0}
+
+/* ══════════════════════════════════════════════════════════════
+   PRODUCT PAGES
+══════════════════════════════════════════════════════════════ */
+.product-hero{padding:5rem 0 3rem;border-bottom:1px solid var(--border)}
+.breadcrumb{font-family:var(--fm);font-size:.72rem;color:var(--text-dim);cursor:pointer;transition:color .15s}
+.breadcrumb:hover{color:var(--text-muted)}
+.hero-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:2.5rem;flex-wrap:wrap;gap:1rem}
+.hero-body{display:grid;grid-template-columns:1fr;gap:3rem;align-items:flex-start}
+@media(min-width:900px){.hero-body{grid-template-columns:1fr 380px}}
+.hero-h1{font-family:var(--fd);font-size:clamp(1.9rem,5vw,3rem);font-weight:500;line-height:1.15;color:var(--text);margin-bottom:1.25rem}
+.hero-lead{font-size:1rem;line-height:1.75;color:var(--text-muted);max-width:56ch;margin-bottom:2rem}
+.hero-actions{display:flex;flex-wrap:wrap;gap:.75rem}
+/* Content sections */
+.content-section{padding:4rem 0;border-top:1px solid var(--border)}
+.two-col{display:grid;grid-template-columns:1fr;gap:3rem}
+@media(min-width:768px){.two-col{grid-template-columns:1fr 1fr}}
+.prose{font-size:.95rem;line-height:1.75;color:var(--text-muted);max-width:68ch}
+.prose p+p{margin-top:1rem}
+
+/* Quantum readiness */
+.dial-card{background:rgba(28,25,23,.7);border:1px solid var(--border);border-radius:14px;padding:1.75rem}
+.dial-label{font-family:var(--fm);font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1rem}
+.dial-rings{display:flex;justify-content:center;margin-bottom:1.5rem}
+.dial-rings svg{width:120px;height:120px}
+.dial-legend{display:flex;flex-direction:column;gap:.55rem}
+.dial-row{display:flex;align-items:center;gap:.6rem}
+.dial-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.dial-name{font-family:var(--fm);font-size:.66rem;color:var(--text-muted);flex:1}
+.dial-score{font-family:var(--fm);font-size:.66rem;font-weight:600}
+
+.deliver-list{display:flex;flex-direction:column;gap:1.25rem}
+.deliver-item{display:flex;gap:.75rem;align-items:flex-start}
+.deliver-icon{width:20px;height:20px;flex-shrink:0;margin-top:.15rem;color:var(--teal)}
+.deliver-icon svg{width:100%;height:100%}
+.deliver-title{font-size:.9rem;font-weight:500;color:var(--text);margin-bottom:.25rem}
+.deliver-body{font-size:.82rem;line-height:1.6;color:var(--text-muted)}
+
+.steps{display:flex;flex-direction:column;gap:1.25rem}
+.step{display:flex;gap:1rem;align-items:flex-start}
+.step-num{font-family:var(--fm);font-size:.62rem;color:var(--teal);opacity:.7;min-width:1.8rem;padding-top:.15rem}
+.step-title{font-size:.9rem;font-weight:500;color:var(--text);margin-bottom:.2rem}
+.step-body{font-size:.82rem;line-height:1.6;color:var(--text-muted)}
+
+.areas-section{padding:4rem 0;border-top:1px solid var(--border)}
+.areas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem}
+.area-card{padding:1.25rem;border-radius:10px;border:1px solid rgba(255,255,255,.06);background:rgba(28,25,23,.5);transition:border-color .2s}
+.area-code{font-family:var(--fm);font-size:.6rem;letter-spacing:.2em;margin-bottom:.5rem}
+.area-name{font-family:var(--fd);font-size:.95rem;color:var(--text);margin-bottom:.5rem}
+.area-desc{font-size:.78rem;line-height:1.6;color:var(--text-muted)}
+
+/* Intake questionnaire */
+.intake-section{padding:3rem 0 5rem;border-top:1px solid var(--border)}
+.intake-intro{max-width:560px}
+.intake-heading{font-size:clamp(1.5rem,3.5vw,2rem);font-weight:500;line-height:1.2;color:var(--text);margin-bottom:1rem}
+.intake-lead{font-size:.9rem;line-height:1.75;color:var(--text-muted);margin-bottom:2rem;max-width:52ch}
+.intake-start-btn{font-size:.8rem;padding:.8rem 1.75rem}
+.intake-flow{max-width:680px}
+.intake-progress{display:flex;align-items:center;gap:0;margin-bottom:2.5rem}
+.progress-step{display:flex;flex-direction:column;align-items:center;gap:.4rem}
+.progress-dot{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:.65rem;color:var(--text-dim);transition:all .2s}
+.progress-step.active .progress-dot,.progress-step.done .progress-dot{border-color:#2dd4bf;color:#2dd4bf;background:rgba(45,212,191,.08)}
+.progress-label{font-family:var(--fm);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim)}
+.progress-step.active .progress-label,.progress-step.done .progress-label{color:var(--text-muted)}
+.progress-line{flex:1;height:1px;background:var(--border);margin:0 .5rem .9rem;transition:background .3s}
+.progress-line.active{background:rgba(45,212,191,.4)}
+.intake-card{background:rgba(28,25,23,.7);border:1px solid var(--border);border-radius:14px;padding:2rem 2.25rem}
+.intake-card-label{font-family:var(--fm);font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.75rem}
+.intake-card-heading{font-size:1.2rem;font-weight:500;color:var(--text);margin-bottom:1.75rem}
+.intake-field{margin-bottom:1.5rem}
+.intake-field-label{font-family:var(--fm);font-size:.68rem;letter-spacing:.08em;color:var(--text-muted);margin-bottom:.6rem}
+.pill-group{display:flex;flex-wrap:wrap;gap:.5rem}
+.pill{font-family:var(--fm);font-size:.7rem;padding:.4rem .85rem;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;transition:all .15s}
+.pill:hover{border-color:rgba(45,212,191,.4);color:var(--text)}
+.pill.selected{border-color:#2dd4bf;background:rgba(45,212,191,.1);color:#2dd4bf}
+.intake-card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:2rem}
+.intake-back{font-size:.75rem;padding:.5rem .75rem;opacity:.7}
+.intake-back:hover{opacity:1}
+button[disabled]{opacity:.35;cursor:not-allowed;pointer-events:none}
+.intake-subtext{font-size:.82rem;color:var(--text-dim);margin-bottom:1.5rem;margin-top:-.75rem}
+.ratings-list{display:flex;flex-direction:column;gap:1rem}
+.rating-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.rating-row-left{display:flex;align-items:center;gap:.6rem;min-width:160px}
+.rating-dim-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.rating-dim-name{font-size:.82rem;color:var(--text-muted)}
+.rating-buttons{display:flex;gap:.35rem}
+.rating-btn{width:32px;height:32px;border-radius:6px;border:1px solid var(--border);background:transparent;font-family:var(--fm);font-size:.7rem;color:var(--text-dim);cursor:pointer;transition:all .15s}
+.rating-btn:hover{border-color:rgba(255,255,255,.2);color:var(--text)}
+.rating-btn.past{border-color:rgba(45,212,191,.3);background:rgba(45,212,191,.05);color:var(--text-dim)}
+.rating-btn.selected{border-color:var(--dc,#2dd4bf);background:var(--dc,#2dd4bf);color:#0c0a09;font-weight:600}
+.rating-scale-hint{display:flex;justify-content:space-between;margin-top:1rem;padding:0 .5rem}
+.results-card{border-color:rgba(45,212,191,.2)}
+.results-tier-row{display:flex;align-items:center;gap:1rem;margin-bottom:1rem}
+.results-tier-badge{font-family:var(--fm);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;padding:.3rem .7rem;border-radius:5px;border:1px solid}
+.results-score{font-size:1.4rem;font-weight:600}
+.results-insight{font-size:.875rem;line-height:1.7;color:var(--text-muted);margin-bottom:1rem}
+.results-sector-note{display:flex;align-items:flex-start;gap:.6rem;font-size:.8rem;line-height:1.6;color:var(--text-muted);background:rgba(45,212,191,.05);border:1px solid rgba(45,212,191,.15);border-radius:8px;padding:.75rem 1rem;margin-bottom:1.5rem}
+.results-dims{display:flex;flex-direction:column;gap:.65rem;margin-bottom:1.5rem}
+.result-dim-row{display:flex;align-items:center;gap:.75rem}
+.result-dim-label{font-family:var(--fm);font-size:.65rem;color:var(--text-dim);width:140px;flex-shrink:0}
+.result-dim-bar-track{flex:1;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
+.result-dim-bar-fill{height:100%;border-radius:2px;transition:width .6s ease}
+.result-dim-score{font-family:var(--fm);font-size:.65rem;width:2.5rem;text-align:right;flex-shrink:0}
+.results-cta-text{font-size:.78rem;line-height:1.7;color:var(--text-dim);margin-bottom:1.5rem;border-top:1px solid var(--border);padding-top:1.25rem}
+.results-actions{display:flex;flex-wrap:wrap;gap:.75rem;margin-bottom:1.5rem}
+.intake-restart{background:none;border:none;cursor:pointer;font-family:var(--fm);font-size:.65rem;letter-spacing:.1em;color:var(--text-dim);padding:0;transition:color .15s}
+.intake-restart:hover{color:var(--text-muted)}
+
+/* Maturity model */
+.tier-preview-card{background:rgba(28,25,23,.7);border:1px solid var(--border);border-radius:14px;padding:1.5rem}
+.tiers-mini{display:flex;flex-direction:column;gap:.6rem}
+.tier-mini{display:grid;grid-template-columns:2rem 1fr auto;align-items:center;gap:.75rem;padding:.6rem .75rem;border-radius:8px;border:1px solid transparent;opacity:.4}
+.tier-mini.t-done{border-color:rgba(52,211,153,.25);background:rgba(52,211,153,.05);opacity:1}
+.tier-mini.t-active{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);opacity:1}
+.tier-num-s{font-family:var(--fm);font-size:.6rem;color:var(--text-dim)}
+.tier-name-s{font-family:var(--fd);font-size:.85rem;color:var(--text)}
+.tier-sub-s{font-size:.68rem;color:var(--text-dim);margin-top:1px}
+.tier-risk{font-family:var(--fm);font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;padding:.15rem .45rem;border-radius:3px;white-space:nowrap}
+.risk-critical{background:rgba(239,68,68,.12);color:#f87171}
+.risk-high{background:rgba(249,115,22,.12);color:#fb923c}
+.risk-medium{background:rgba(234,179,8,.12);color:#facc15}
+.risk-low{background:rgba(132,204,22,.12);color:#a3e635}
+.risk-minimal{background:rgba(52,211,153,.12);color:#34d399}
+
+.dims-section,.value-section{padding:4rem 0;border-top:1px solid var(--border)}
+.dims-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:1rem}
+.dim-card{padding:1.25rem;border-radius:10px;border:1px solid rgba(255,255,255,.06);background:rgba(28,25,23,.5);transition:border-color .2s}
+.dim-code{font-family:var(--fm);font-size:.6rem;letter-spacing:.2em;margin-bottom:.5rem}
+.dim-name{font-family:var(--fd);font-size:.95rem;color:var(--text);margin-bottom:.5rem}
+.dim-blurb{font-size:.78rem;line-height:1.6;color:var(--text-muted)}
+.value-list{display:flex;flex-direction:column;gap:.8rem}
+.value-item{display:flex;align-items:flex-start;gap:.65rem;font-size:.875rem;line-height:1.6;color:var(--text-muted)}
+.value-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:.55rem;opacity:.8}
+.use-list{display:flex;flex-direction:column;gap:1.25rem}
+.use-title{font-size:.9rem;font-weight:500;color:var(--text);margin-bottom:.25rem}
+.use-body{font-size:.82rem;line-height:1.6;color:var(--text-muted)}
+
+/* Supplier */
+.supply-card{background:rgba(28,25,23,.7);border:1px solid var(--border);border-radius:14px;padding:1.5rem}
+.supply-tiers{display:flex;flex-direction:column;gap:.85rem;margin-bottom:1rem}
+.supply-tier{display:flex;flex-direction:column;gap:.3rem}
+.supply-bar-wrap{height:3px;border-radius:2px}
+.supply-info{display:flex;justify-content:space-between;align-items:center}
+.supply-label-s{font-family:var(--fm);font-size:.63rem;color:var(--text-muted)}
+.supply-pct{font-family:var(--fm);font-size:.63rem;font-weight:600}
+.supply-note{font-family:var(--fm);font-size:.6rem;color:var(--text-dim);line-height:1.5;border-top:1px solid var(--border);padding-top:.75rem}
+.phases-section,.included-section{padding:4rem 0;border-top:1px solid var(--border)}
+.phases-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem}
+.phase-card{padding:1.4rem;border-radius:12px;border:1px solid rgba(167,139,250,.2);background:rgba(167,139,250,.04)}
+.phase-num{font-family:var(--fm);font-size:.6rem;letter-spacing:.2em;color:var(--violet);margin-bottom:.5rem}
+.phase-name{font-family:var(--fd);font-size:.95rem;color:var(--text);margin-bottom:.5rem}
+.phase-desc{font-size:.78rem;line-height:1.6;color:var(--text-muted);margin-bottom:.75rem}
+.phase-items{list-style:none;padding:0;display:flex;flex-direction:column;gap:.35rem}
+.phase-items li{font-family:var(--fm);font-size:.63rem;color:var(--text-dim);padding-left:.85rem;position:relative}
+.phase-items li::before{content:'·';position:absolute;left:0;color:var(--violet)}
+.included-list{display:flex;flex-direction:column;gap:1.5rem}
+.included-item{display:flex;gap:.85rem;align-items:flex-start}
+.incl-icon{width:20px;height:20px;flex-shrink:0;margin-top:.1rem}
+.incl-icon svg{width:100%;height:100%}
+.incl-title{font-size:.9rem;font-weight:500;color:var(--text);margin-bottom:.25rem}
+.incl-body{font-size:.82rem;line-height:1.6;color:var(--text-muted)}
+.outcomes{display:flex;flex-direction:column;gap:.8rem}
+.outcome{display:flex;align-items:flex-start;gap:.65rem;font-size:.875rem;line-height:1.6;color:var(--text-muted)}
+.outcome-check{font-size:.85rem;flex-shrink:0;margin-top:.1rem}
+.teaser-section{padding:3rem 0 5rem}
+.teaser-card{border-radius:14px;padding:2.5rem;display:flex;flex-direction:column;gap:1.5rem;align-items:flex-start}
+@media(min-width:640px){.teaser-card{flex-direction:row;align-items:center}}
+
+/* Code scan */
+.terminal-card{border-radius:12px;overflow:hidden;border:1px solid var(--border);background:#0a0908}
+.terminal-bar{display:flex;align-items:center;gap:.75rem;padding:.65rem 1rem;background:#1a1714;border-bottom:1px solid var(--border)}
+.term-dots{display:flex;gap:.35rem}
+.term-dots span{width:10px;height:10px;border-radius:50%}
+.term-title-s{font-family:var(--fm);font-size:.65rem;letter-spacing:.12em;color:var(--text-dim)}
+.term-body{padding:1.25rem;font-family:var(--fm);font-size:.7rem;line-height:1.8}
+.tline{color:var(--text-muted)}
+.tline.green{color:#34d399}.tline.red{color:#f87171}.tline.amber{color:#fbbf24}.tline.dim{color:#57534e}
+.tline.bold{font-weight:600}.prompt{color:var(--teal);margin-right:.4rem}
+.detects-section,.output-section{padding:4rem 0;border-top:1px solid var(--border)}
+.detects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem}
+.detect-card{padding:1.4rem;border-radius:12px;border:1px solid rgba(232,121,249,.15);background:rgba(232,121,249,.03);display:flex;flex-direction:column;gap:.65rem;transition:border-color .2s}
+.detect-card:hover{border-color:rgba(232,121,249,.35)}
+.detect-icon{width:22px;height:22px;color:var(--fuchsia)}
+.detect-icon svg{width:100%;height:100%}
+.detect-title{font-size:.9rem;font-weight:500;color:var(--text)}
+.detect-body{font-size:.78rem;line-height:1.6;color:var(--text-muted);flex:1}
+.detect-exs{display:flex;flex-wrap:wrap;gap:.35rem}
+.detect-ex{font-family:var(--fm);font-size:.58rem;padding:.15rem .45rem;border-radius:3px;background:rgba(232,121,249,.1);color:var(--fuchsia);border:1px solid rgba(232,121,249,.2)}
+.output-list{display:flex;flex-direction:column;gap:1.4rem}
+.out-item{display:flex;gap:1rem;align-items:flex-start}
+.out-num{font-family:var(--fm);font-size:.6rem;color:var(--fuchsia);opacity:.7;min-width:1.8rem;padding-top:.2rem}
+.out-title{font-size:.9rem;font-weight:500;color:var(--text);margin-bottom:.25rem}
+.out-body{font-size:.82rem;line-height:1.6;color:var(--text-muted)}
+.langs-grid{display:flex;flex-wrap:wrap;gap:.5rem}
+.lang-pill{font-family:var(--fm);font-size:.63rem;padding:.25rem .65rem;border-radius:4px;border:1px solid var(--border);color:var(--text-muted)}
+.integ-list{display:flex;flex-direction:column;gap:.55rem}
+.integ{display:flex;align-items:center;gap:.6rem}
+.integ-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;opacity:.7}
+.integ span{font-family:var(--fm);font-size:.72rem;color:var(--text-muted)}
+.beta-section{padding:3rem 0 5rem}
+.beta-card{border-radius:14px;padding:2.5rem;max-width:600px}
+
+/* About */
+.about-hero-body{display:grid;grid-template-columns:1fr;gap:3rem;align-items:center}
+@media(min-width:900px){.about-hero-body{grid-template-columns:1fr auto}}
+.about-logo-area{display:flex;flex-direction:column;align-items:center;gap:1rem}
+.about-logo-svg{width:clamp(80px,14vw,120px);height:clamp(80px,14vw,120px);filter:drop-shadow(0 0 20px rgba(122,173,151,.35))}
+.about-logo-label{font-family:var(--fd);font-size:1.1rem;letter-spacing:.22em;color:var(--text-muted)}
+.mission-section{padding:4rem 0;border-top:1px solid var(--border)}
+.mission-grid{display:grid;grid-template-columns:1fr;gap:2.5rem}
+@media(min-width:640px){.mission-grid{grid-template-columns:repeat(3,1fr)}}
+.mission-item{display:flex;flex-direction:column;gap:1rem}
+.mission-icon{width:32px;height:32px;color:#7aad97;opacity:.8}
+.mission-icon svg{width:100%;height:100%}
+.mission-title{font-family:var(--fd);font-size:1.05rem;color:var(--text)}
+.mission-body{font-size:.85rem;line-height:1.75;color:var(--text-muted)}
+.standards-section{padding:4rem 0;border-top:1px solid var(--border)}
+.standards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem}
+.std-card{padding:1.1rem 1.25rem;border-radius:10px;border:1px solid var(--border);background:rgba(28,25,23,.5);transition:border-color .2s}
+.std-card:hover{border-color:rgba(122,173,151,.35)}
+.std-name{font-family:var(--fm);font-size:.68rem;letter-spacing:.08em;color:#7aad97;margin-bottom:.5rem;opacity:.9}
+.std-body{font-size:.78rem;line-height:1.6;color:var(--text-muted)}
+.contact-section{padding:3rem 0 5rem}
+.contact-card{background:rgba(122,173,151,.06);border:1px solid rgba(122,173,151,.2);border-radius:14px;padding:2.5rem;display:flex;flex-direction:column;gap:2rem;align-items:flex-start}
+@media(min-width:640px){.contact-card{flex-direction:row;align-items:center;justify-content:space-between}}
+.contact-actions{display:flex;gap:.75rem;flex-wrap:wrap;flex-shrink:0}
+
+/* ── Access form modal (shared) ── */
+.modal-backdrop{position:fixed;inset:0;background:rgba(12,10,9,.82);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:999;padding:1.5rem;animation:mBdIn .18s ease forwards}
+@keyframes mBdIn{from{opacity:0}to{opacity:1}}
+.modal-card{background:#1a1714;border:1px solid rgba(251,191,36,.25);border-radius:16px;padding:2.25rem 2.5rem;width:100%;max-width:480px;position:relative;animation:mCdIn .22s cubic-bezier(.2,0,.2,1) forwards}
+@keyframes mCdIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+.modal-card.violet-modal{border-color:rgba(167,139,250,.25)}
+.modal-card.fuchsia-modal{border-color:rgba(232,121,249,.25)}
+.modal-close-btn{position:absolute;top:1.1rem;right:1.1rem;width:28px;height:28px;background:transparent;border:none;cursor:pointer;color:var(--text-dim);transition:color .15s;padding:0;display:flex;align-items:center;justify-content:center}
+.modal-close-btn:hover{color:var(--text)}
+.modal-close-btn svg{width:16px;height:16px}
+.modal-lbl{font-family:var(--fm);font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:.75rem;opacity:.8}
+.modal-lbl.amber{color:#fbbf24}.modal-lbl.violet{color:#a78bfa}.modal-lbl.fuchsia{color:#e879f9}
+.modal-hdg{font-family:var(--fd);font-size:1.35rem;font-weight:500;color:var(--text);margin-bottom:.5rem}
+.modal-sub{font-size:.85rem;line-height:1.65;color:var(--text-muted);margin-bottom:1.75rem}
+.access-form{display:flex;flex-direction:column;gap:1rem}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:480px){.form-row{grid-template-columns:1fr}}
+.form-field{display:flex;flex-direction:column;gap:.4rem}
+.form-lbl{font-family:var(--fm);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim)}
+.form-inp{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:7px;padding:.6rem .85rem;font-family:var(--fm);font-size:.8rem;color:var(--text);outline:none;transition:border-color .15s;width:100%;box-sizing:border-box}
+.form-inp::placeholder{color:var(--text-dim)}
+.form-inp:focus{border-color:rgba(251,191,36,.5)}
+.form-inp.vi:focus{border-color:rgba(167,139,250,.5)}
+.form-inp.fu:focus{border-color:rgba(232,121,249,.5)}
+.form-submit{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--fm);font-size:.8rem;padding:.8rem 1.5rem;border-radius:7px;cursor:pointer;transition:all .2s;text-decoration:none;margin-top:.5rem;width:100%;justify-content:center;box-sizing:border-box}
+.form-submit.amber{background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.45);color:#fbbf24}
+.form-submit.amber:hover{background:rgba(251,191,36,.2);border-color:rgba(251,191,36,.7);box-shadow:0 0 20px -6px rgba(251,191,36,.4)}
+.form-submit.violet{background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.45);color:#a78bfa}
+.form-submit.violet:hover{background:rgba(167,139,250,.2);border-color:rgba(167,139,250,.7);box-shadow:0 0 20px -6px rgba(167,139,250,.4)}
+.form-submit.fuchsia{background:rgba(232,121,249,.12);border:1px solid rgba(232,121,249,.45);color:#e879f9}
+.form-submit.fuchsia:hover{background:rgba(232,121,249,.2);border-color:rgba(232,121,249,.7);box-shadow:0 0 20px -6px rgba(232,121,249,.4)}
+.modal-success{display:flex;flex-direction:column;align-items:center;text-align:center;gap:.75rem;padding:.5rem 0}
+.success-icon{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:.5rem}
+.success-icon svg{width:24px;height:24px}
+.success-icon.amber{background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25)}
+.success-icon.violet{background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.25)}
+.success-icon.fuchsia{background:rgba(232,121,249,.08);border:1px solid rgba(232,121,249,.25)}
+.modal-note{font-size:.75rem;color:var(--text-dim);line-height:1.6;max-width:34ch}
+.modal-close-txt{background:none;border:none;cursor:pointer;font-family:var(--fm);font-size:.65rem;letter-spacing:.1em;color:var(--text-dim);padding:0;transition:color .15s;margin-top:.5rem}
+.modal-close-txt:hover{color:var(--text-muted)}
+</style>
+</head>
+<body class="grid-bg">
+<div id="app"></div>
+
+<script>
+const { createApp, ref, reactive, computed, onMounted, onUnmounted, h, Transition } = Vue
+const { createRouter, createWebHashHistory, RouterLink, useRouter, useRoute } = VueRouter
+
+/* ──────────────────────────────────────────
+   SVGs
+──────────────────────────────────────────── */
+const IrekaiLogoSVG = `<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="4" y="4" width="92" height="92" rx="4" stroke="#2dd4bf" stroke-width="4.5"/>
+  <rect x="16" y="16" width="68" height="68" rx="2" stroke="#2dd4bf" stroke-width="3" stroke-opacity=".75"/>
+  <rect x="28" y="28" width="44" height="44" rx="1" stroke="#2dd4bf" stroke-width="2.5" stroke-opacity=".55"/>
+  <rect x="38" y="38" width="24" height="24" rx="1" stroke="#2dd4bf" stroke-width="2" stroke-opacity=".4"/>
+  <circle class="logo-dot" cx="50" cy="50" r="4.5" fill="#2dd4bf" fill-opacity=".9"/>
+</svg>`
+
+/* ──────────────────────────────────────────
+   NAVBAR
+──────────────────────────────────────────── */
+const NavBar = {
+  setup() {
+    const router = useRouter()
+    const route = useRoute()
+    const menuOpen = ref(false)
+    const productsOpen = ref(false)
+    const isScrolled = ref(false)
+    const products = [
+      { to: '/products/quantum-readiness',   label: 'Quantum Readiness Assessment', color: '#2dd4bf' },
+      { to: '/products/maturity-model',      label: 'PQC Maturity Model',           color: '#fbbf24' },
+      { to: '/products/supplier-management', label: 'Supplier Management',           color: '#a78bfa' },
+      { to: '/products/code-scanning',       label: 'Cryptographic Code Scanner',   color: '#e879f9' },
+    ]
+    function go(path) { router.push(path); menuOpen.value = false; productsOpen.value = false }
+    function toggleProducts(e) { e.stopPropagation(); productsOpen.value = !productsOpen.value }
+    function onScroll() { isScrolled.value = window.scrollY > 24 }
+    function onClickOutside(e) { if (!e.target.closest('.nav-dd')) productsOpen.value = false }
+    onMounted(() => {
+      window.addEventListener('scroll', onScroll, { passive: true })
+      document.addEventListener('click', onClickOutside)
+    })
+    onUnmounted(() => {
+      window.removeEventListener('scroll', onScroll)
+      document.removeEventListener('click', onClickOutside)
+    })
+    return { menuOpen, productsOpen, isScrolled, products, route, go, toggleProducts }
+  },
+  template: `
+<div>
+  <header id="navbar" :class="{ scrolled: isScrolled }">
+    <div class="container nav-inner">
+      <div class="nav-logo" @click="go('/')" style="cursor:pointer">
+        <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="28" y="28" width="144" height="144" fill="none" stroke="#7aad97" stroke-width="1.6"/>
+          <g stroke="#7aad97" stroke-width="1.1" stroke-opacity=".65" stroke-linecap="square">
+            <line x1="17" y1="28" x2="28" y2="28"/><line x1="28" y1="17" x2="28" y2="28"/>
+            <line x1="172" y1="28" x2="183" y2="28"/><line x1="172" y1="17" x2="172" y2="28"/>
+            <line x1="172" y1="172" x2="183" y2="172"/><line x1="172" y1="172" x2="172" y2="183"/>
+            <line x1="17" y1="172" x2="28" y2="172"/><line x1="28" y1="172" x2="28" y2="183"/>
+          </g>
+          <rect x="68" y="68" width="64" height="64" fill="none" stroke="#7aad97" stroke-width=".9" stroke-opacity=".42"/>
+          <g stroke="#7aad97" stroke-opacity=".22" stroke-width=".7">
+            <line x1="100" y1="68" x2="100" y2="132"/><line x1="68" y1="100" x2="132" y2="100"/>
+          </g>
+          <circle cx="100" cy="100" r="6.5" fill="none" stroke="#7aad97" stroke-width="1.1" stroke-opacity=".74"/>
+          <circle cx="100" cy="100" r="2.7" fill="#7aad97"/>
+        </svg>
+        <span class="nav-logo-name">IREKAI</span>
+      </div>
+      <nav class="nav-links">
+        <div class="nav-dd">
+          <button class="nav-link dd-trigger" :class="{ active: route.path.startsWith('/products') }" @click="toggleProducts">
+            Products
+            <svg class="dd-chevron" :class="{ open: productsOpen }" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6l4 4 4-4"/></svg>
+          </button>
+          <div class="dd-menu" :class="{ open: productsOpen }">
+            <button class="dd-item" v-for="p in products" :key="p.to" @click="go(p.to)">
+              <span class="dd-dot" :style="'background:'+p.color"></span>
+              <span>{{ p.label }}</span>
+            </button>
+          </div>
+        </div>
+        <button class="nav-link" :class="{ active: route.path === '/about' }" @click="go('/about')">About</button>
+        <a href="mailto:info@irekai.nl" class="btn btn-sage nav-cta" style="font-size:.72rem;padding:.4rem .9rem;">Contact</a>
+      </nav>
+      <button class="burger" :class="{ open: menuOpen }" @click="menuOpen = !menuOpen" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="mobile-menu" :class="{ open: menuOpen }">
+      <div class="mob-label">Products</div>
+      <button class="mob-link" v-for="p in products" :key="p.to" @click="go(p.to)" :style="'--accent:'+p.color">{{ p.label }}</button>
+      <hr class="mob-divider"/>
+      <button class="mob-link" @click="go('/about')">About</button>
+      <a href="mailto:info@irekai.nl" class="mob-link teal-link">Contact →</a>
+    </div>
+  </header>
+</div>`
+}
+
+/* ──────────────────────────────────────────
+   FOOTER
+──────────────────────────────────────────── */
+const SiteFooter = {
+  setup() {
+    const router = useRouter()
+    const year = new Date().getFullYear()
+    function go(path) { router.push(path) }
+    return { year, go }
+  },
+  template: `
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <div class="footer-logo-row" @click="go('/')" style="cursor:pointer">
+        <svg viewBox="0 0 200 200" fill="none"><rect x="28" y="28" width="144" height="144" fill="none" stroke="#7aad97" stroke-width="1.6"/><g stroke="#7aad97" stroke-width="1.1" stroke-opacity=".65" stroke-linecap="square"><line x1="17" y1="28" x2="28" y2="28"/><line x1="28" y1="17" x2="28" y2="28"/><line x1="172" y1="28" x2="183" y2="28"/><line x1="172" y1="17" x2="172" y2="28"/><line x1="172" y1="172" x2="183" y2="172"/><line x1="172" y1="172" x2="172" y2="183"/><line x1="17" y1="172" x2="28" y2="172"/><line x1="28" y1="172" x2="28" y2="183"/></g><rect x="68" y="68" width="64" height="64" fill="none" stroke="#7aad97" stroke-width=".9" stroke-opacity=".42"/><g stroke="#7aad97" stroke-opacity=".22" stroke-width=".7"><line x1="100" y1="68" x2="100" y2="132"/><line x1="68" y1="100" x2="132" y2="100"/></g><circle cx="100" cy="100" r="6.5" fill="none" stroke="#7aad97" stroke-width="1.1" stroke-opacity=".74"/><circle cx="100" cy="100" r="2.7" fill="#7aad97"/></svg>
+        <span class="footer-logo-name">IREKAI</span>
+      </div>
+      <div class="footer-tagline">Cryptographic resilience<br/>for the quantum age.</div>
+    </div>
+    <nav class="footer-nav">
+      <div class="footer-nav-col">
+        <div class="footer-nav-label">Products</div>
+        <span class="footer-link" @click="go('/products/quantum-readiness')">Quantum Readiness</span>
+        <span class="footer-link" @click="go('/products/maturity-model')">PQC Maturity Model</span>
+        <span class="footer-link" @click="go('/products/supplier-management')">Supplier Management</span>
+        <span class="footer-link" @click="go('/products/code-scanning')">Code Scanner</span>
+      </div>
+      <div class="footer-nav-col">
+        <div class="footer-nav-label">Company</div>
+        <span class="footer-link" @click="go('/about')">About</span>
+        <a href="mailto:info@irekai.nl" class="footer-link">Contact</a>
+        <a href="https://irekai.nl" class="footer-link">irekai.nl ↗</a>
+      </div>
+    </nav>
+  </div>
+  <div class="footer-bottom">
+    <div class="container footer-bottom-inner">
+      <span class="footer-copy">© {{ year }} IREKAI · Post-Quantum Security</span>
+      <span class="footer-copy">irekai.nl</span>
+    </div>
+  </div>
+</footer>`
+}
+
+/* ──────────────────────────────────────────
+   HOME VIEW
+──────────────────────────────────────────── */
+const HomeView = {
+  setup() {
+    const router = useRouter()
+    const go = (path) => router.push(path)
+
+    const T = {
+      p1Start:180, p1Stagger:75, p2Start:880, p2Stagger:75,
+      labelsIn:1680, dimStart:2900, collapseStart:3680,
+      sealIn:4480, sealDraw:4880, labelsFade:3680, tagIn:4700,
+    }
+    const FADE_IDS = [3,4,5,6,8,9]
+    let timers = []
+    function after(ms, fn) { timers.push(setTimeout(fn, ms)) }
+    function g(id) { return document.getElementById('hv-'+id) }
+
+    function run() {
+      const sealArea = g('sealArea'), labelsRow = g('labelsRow')
+      const tagline = g('tagline'), spacerLine = g('spacerLine')
+      const spacer = g('spacer')
+      // Phase 1: IREMIA
+      for (let i = 0; i < 6; i++) {
+        after(T.p1Start + i*T.p1Stagger, () => { const lw = g('l'+i); if(lw) lw.classList.add('visible') })
+      }
+      // Phase 2: IKIGAI + spacer divider
+      for (let i = 0; i < 6; i++) {
+        after(T.p2Start + i*T.p2Stagger, () => { const lw = g('l'+(6+i)); if(lw) lw.classList.add('visible') })
+      }
+      after(T.p2Start, () => { if(spacerLine) spacerLine.classList.add('visible') })
+      // Labels in
+      after(T.labelsIn, () => { if(labelsRow) labelsRow.classList.add('visible') })
+      // Dim fading letters
+      after(T.dimStart, () => { FADE_IDS.forEach(i => { const lw = g('l'+i); if(lw) lw.classList.add('dimmed') }) })
+      // Collapse to IREKAI + labels fade simultaneously
+      after(T.collapseStart, () => {
+        if(spacerLine) spacerLine.classList.remove('visible')
+        FADE_IDS.forEach(i => { const lw = g('l'+i); if(lw) lw.classList.add('collapse') })
+        if(spacer) spacer.classList.add('collapse')
+      })
+      after(T.labelsFade, () => { if(labelsRow) labelsRow.classList.remove('visible') })
+      // Seal appears and draws
+      after(T.sealIn, () => {
+        if(sealArea) { sealArea.classList.add('visible'); setTimeout(() => sealArea.classList.add('drawing'), 400) }
+      })
+      // Tagline
+      after(T.tagIn, () => { if(tagline) tagline.classList.add('visible') })
+    }
+
+    onMounted(() => setTimeout(run, 300))
+    onUnmounted(() => timers.forEach(clearTimeout))
+
+    const whyItems = [
+      {title:'Built for practitioners',body:'Every framework and tool has been designed to offer real-world migration assistance.',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>'},
+      {title:'End-to-end coverage',body:'From the first boardroom conversation to continuous post-migration monitoring — IREKAI covers the full quantum transition lifecycle.',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>'},
+      {title:'Standards-aligned',body:'Aligned with FIPS 203/204/205, CNSA 2.0, NIS2, ISO 27001, and emerging EU regulations. Your compliance evidence is built in.',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>'},
+      {title:'Actionable, not theoretical',body:'No lengthy consulting engagements that end in a shelf report. IREKAI delivers tools and actionable advice you can use today.',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>'},
+    ]
+    const products = [
+      {cls:'pc-sage product-card--featured',ic:'color:#7aad97',badge:true,to:'/products/quantum-readiness',title:'Quick Quantum Readiness Assessment',desc:"Our flagship product. Understand your organisation's cryptographic posture in 4-6 weeks, not months. Pinpoint your most critical business cases, prioritise high risks, and walk away with a concrete cryptographic migration roadmap tailored to your core business.",tags:['Assessment','Risk scoring','Roadmap'],cta:'Start assessment',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'},
+      {cls:'pc-amber',ic:'color:#fbbf24',badge:false,to:'/products/maturity-model',title:'PQC Migration Maturity Model',desc:'A five-tier maturity framework across five dimensions. Track your progress, identify gaps, and drive your quantum migration with structured milestones.',tags:['Framework','5 dimensions','Interactive'],cta:'Explore model',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 20h20M6 20V10M12 20V4M18 20v-8"/></svg>'},
+      {cls:'pc-violet',ic:'color:#a78bfa',badge:false,to:'/products/supplier-management',title:'Supplier Management Programme',desc:"Quantum threats are pushed up the supply chain. Systematically assess vendors, embed PQC requirements in contracts, and verify your entire supply chain.",tags:['Supply chain','Risk assessment','Contracts'],cta:'View programme',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>'},
+      {cls:'pc-fuchsia',ic:'color:#e879f9',badge:false,to:'/products/code-scanning',title:'Cryptographic Code Scanner',desc:'Automated static analysis of your codebase. Detect vulnerable keys and algorithms, assess cryptographic agility, and gain insight in every quantum-vulnerable dependency.',tags:['SAST','Crypto agility','CBOM'],cta:'Learn more',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>'},
+    ]
+    return { go, whyItems, products }
+  },
+  template: `
+<div>
+  <!-- Hero: IREMIA + IKIGAI merge into IREKAI (looping) -->
+  <section class="hero-section">
+    <div class="hero-center" id="hv-scene">
+      <!-- Seal — appears and draws after the merge -->
+      <div class="seal-area" id="hv-sealArea">
+        <svg width="148" height="148" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="hv-lat" x="0" y="0" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(45 100 100)"><circle cx="0" cy="0" r="1.3" fill="#7aad97" fill-opacity=".55"/></pattern>
+            <clipPath id="hv-clip"><rect x="69" y="69" width="62" height="62"/></clipPath>
+          </defs>
+          <rect class="seal-rect-outer" x="28" y="28" width="144" height="144" fill="none" stroke="#7aad97" stroke-width="1.6"/>
+          <g class="seal-corners" stroke="#7aad97" stroke-width="1.1" stroke-opacity=".65" stroke-linecap="square">
+            <line x1="17" y1="28" x2="28" y2="28"/><line x1="28" y1="17" x2="28" y2="28"/>
+            <line x1="172" y1="28" x2="183" y2="28"/><line x1="172" y1="17" x2="172" y2="28"/>
+            <line x1="172" y1="172" x2="183" y2="172"/><line x1="172" y1="172" x2="172" y2="183"/>
+            <line x1="17" y1="172" x2="28" y2="172"/><line x1="28" y1="172" x2="28" y2="183"/>
+          </g>
+          <g class="seal-lattice"><rect x="69" y="69" width="62" height="62" fill="url(#hv-lat)" clip-path="url(#hv-clip)"/></g>
+          <rect class="seal-rect-inner" x="68" y="68" width="64" height="64" fill="none" stroke="#7aad97" stroke-width=".9" stroke-opacity=".42"/>
+          <g class="seal-axes" stroke="#7aad97" stroke-opacity=".22" stroke-width=".7">
+            <line x1="100" y1="68" x2="100" y2="132"/><line x1="68" y1="100" x2="132" y2="100"/>
+          </g>
+          <circle class="seal-ring" cx="100" cy="100" r="6.5" fill="none" stroke="#7aad97" stroke-width="1.1" stroke-opacity=".74"/>
+          <circle class="seal-dot" cx="100" cy="100" r="2.7" fill="#7aad97"/>
+        </svg>
+      </div>
+
+      <!-- Name row: IREMIA | IKIGAI → IREKAI -->
+      <div class="name-area" aria-label="IREKAI">
+        <span class="lw"      id="hv-l0"><span class="lt">I</span></span>
+        <span class="lw"      id="hv-l1"><span class="lt">R</span></span>
+        <span class="lw"      id="hv-l2"><span class="lt">E</span></span>
+        <span class="lw fade" id="hv-l3"><span class="lt">M</span></span>
+        <span class="lw fade" id="hv-l4"><span class="lt">I</span></span>
+        <span class="lw fade" id="hv-l5"><span class="lt">A</span></span>
+        <span class="lw spacer" id="hv-spacer">
+          <span class="spacer-line" id="hv-spacerLine"></span>
+        </span>
+        <span class="lw fade" id="hv-l6"><span class="lt">I</span></span>
+        <span class="lw"      id="hv-l7"><span class="lt">K</span></span>
+        <span class="lw fade" id="hv-l8"><span class="lt">I</span></span>
+        <span class="lw fade" id="hv-l9"><span class="lt">G</span></span>
+        <span class="lw"      id="hv-l10"><span class="lt">A</span></span>
+        <span class="lw"      id="hv-l11"><span class="lt">I</span></span>
+      </div>
+
+      <!-- Etymology labels → tagline -->
+      <div class="below-area">
+        <div class="labels-row" id="hv-labelsRow">
+          <div class="word-label">
+            <span class="lbl-glyph">ἠρεμία</span>
+            <span class="lbl-meaning">Greek · stillness</span>
+          </div>
+          <div class="word-label">
+            <span class="lbl-glyph">意気概</span>
+            <span class="lbl-meaning">Japanese · purpose</span>
+          </div>
+        </div>
+        <p class="hero-tagline" id="hv-tagline">Cryptographic clarity first. Migrate with peace of mind.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Products -->
+  <section class="products-section" id="products">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-label">Products &amp; Services</div>
+        <h2 class="section-title fd">Everything you need to become <em style="color:#7aad97">quantum&#8209;ready</em></h2>
+        <p class="section-sub">From initial awareness to continuous cryptographic assurance — IREKAI's tools and frameworks guide your organisation at every step.</p>
+      </div>
+      <div class="products-grid">
+        <div v-for="p in products" :key="p.to" class="product-card" :class="p.cls" @click="go(p.to)">
+          <div v-if="p.badge" class="badge" style="align-self:flex-start;background:rgba(122,173,151,.1);color:#7aad97;border-color:rgba(122,173,151,.3)">Featured · Flagship product</div>
+          <div class="card-icon" :style="p.ic" v-html="p.icon"></div>
+          <h3 class="card-title">{{ p.title }}</h3>
+          <p class="card-desc">{{ p.desc }}</p>
+          <div class="card-tags"><span class="tag" v-for="t in p.tags" :key="t">{{ t }}</span></div>
+          <div class="card-cta" :style="p.ic">{{ p.cta }} <span class="arr">→</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why -->
+  <section class="why-section">
+    <div class="container">
+      <div class="section-label" style="margin-bottom:1.25rem">Why IREKAI</div>
+      <div class="why-grid">
+        <div class="why-item" v-for="w in whyItems" :key="w.title">
+          <div class="why-icon" v-html="w.icon"></div>
+          <div><div class="why-title">{{ w.title }}</div><div class="why-body">{{ w.body }}</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="container cta-inner">
+      <div>
+        <p class="section-label" style="margin-bottom:.75rem">Get started</p>
+        <h2 class="fd" style="font-size:clamp(1.6rem,4vw,2.5rem);line-height:1.15;color:var(--text)">
+          Ready to assess your <em style="color:#7aad97">quantum exposure</em>?
+        </h2>
+      </div>
+      <div class="cta-actions">
+        <button class="btn btn-sage" style="font-size:.8rem;padding:.7rem 1.5rem" @click="go('/products/quantum-readiness')">Start free assessment →</button>
+        <a href="mailto:info@irekai.nl" class="btn btn-ghost" style="font-size:.8rem;padding:.7rem 1.5rem">Talk to an expert</a>
+      </div>
+    </div>
+  </section>
+</div>`
+}
+
+/* ──────────────────────────────────────────
+   QUANTUM READINESS
+──────────────────────────────────────────── */
+const QuantumReadinessView = {
+  setup() {
+    const router = useRouter()
+    const dialItems = [
+      { label:'Crypto Agility', score:'2 / 10', color:'#e879f9' },
+      { label:'Asset Inventory', score:'4 / 10', color:'#22d3ee' },
+      { label:'PQC Availability', score:'1 / 10', color:'#34d399' },
+      { label:'Governance', score:'5 / 10', color:'#fbbf24' },
+      { label:'Supplier Mgmt', score:'3 / 10', color:'#a78bfa' },
+    ]
+    const deliverables = [
+      { title:'Readiness score', body:'A composite score across five cryptographic dimensions — easy to communicate to leadership.' },
+      { title:'Dimension breakdown', body:'Detailed scores for crypto agility, inventory, PQC availability, governance, and supplier management.' },
+      { title:'Risk heat map', body:'Visual mapping of your highest-priority vulnerabilities by business impact and urgency.' },
+      { title:'Prioritised action plan', body:'A concrete, ordered list of actions with effort estimates and expected risk reduction.' },
+      { title:'Migration roadmap', body:'A phased 12–36 month migration roadmap tailored to your organisation\'s size and risk appetite.' },
+    ]
+    const steps = [
+      { title:'Intake questionnaire', body:'Structured questions covering your current cryptographic landscape, completed asynchronously.' },
+      { title:'Expert review session', body:'A 2-hour session with an IREKAI specialist to clarify responses and probe technical depth.' },
+      { title:'Analysis & scoring', body:'We score responses against our maturity model, calibrated to your industry and regulatory context.' },
+      { title:'Results readout', body:'A 1-hour readout walking through findings and agreeing on next steps.' },
+      { title:'Report delivery', body:'Full written report with findings, scores, and prioritised roadmap within 5 business days.' },
+    ]
+    const areas = [
+      { code:'01', name:'Crypto Agility', color:'#e879f9', desc:'Can you swap algorithms without rewriting systems? We assess abstraction, CI/CD policies, and key rotation.' },
+      { code:'02', name:'Asset Inventory', color:'#22d3ee', desc:'Do you know what cryptographic assets you have? We evaluate discovery tooling and CBOM practices.' },
+      { code:'03', name:'PQC Availability', color:'#34d399', desc:'Are post-quantum algorithms deployed? We assess library readiness, sandbox testing, and production status.' },
+      { code:'04', name:'Governance', color:'#fbbf24', desc:'Is quantum risk owned and funded? Executive sponsorship, policy, roadmaps, and compliance alignment.' },
+      { code:'05', name:'Supplier Management', color:'#a78bfa', desc:'Are your vendors quantum-ready? Supply chain visibility, contract requirements, and CBOM coverage.' },
+    ]
+    const dimDefs = [
+      { name:'Crypto Agility',      color:'#e879f9' },
+      { name:'Asset Inventory',     color:'#22d3ee' },
+      { name:'PQC Availability',    color:'#34d399' },
+      { name:'Governance',          color:'#fbbf24' },
+      { name:'Supplier Management', color:'#a78bfa' },
+    ]
+    const sectors = ['Finance & Banking','Healthcare & Life Sciences','Government & Defence','Energy & Critical Infrastructure','Technology & Software','Other']
+    const sizes   = ['Under 100','100–999','1,000–9,999','10,000+']
+    const drivers = ['IP & data protection','Regulatory compliance','Client / supply chain demand','Board / executive directive','Competitive positioning','Not sure yet']
+
+    const step    = ref(0)
+    const profile = reactive({ sector:null, size:null, driver:null })
+    const ratings = reactive({ 'Crypto Agility':0, 'Asset Inventory':0, 'PQC Availability':0, 'Governance':0, 'Supplier Management':0 })
+
+    const profileDone = computed(() => profile.sector && profile.size && profile.driver)
+    const ratingsDone = computed(() => Object.values(ratings).every(v => v > 0))
+    const avgScore    = computed(() => { const v = Object.values(ratings).filter(x=>x>0); return v.length ? v.reduce((a,b)=>a+b,0)/v.length : 0 })
+
+    const tierMap = [
+      { max:1.5, label:'Pre-initial', color:'#f87171', bg:'rgba(239,68,68,.08)',  desc:'Your organisation has not yet meaningfully addressed quantum cryptographic risk. The good news: you\'re early enough to plan properly.' },
+      { max:2.5, label:'Initial',     color:'#fb923c', bg:'rgba(249,115,22,.08)', desc:'First steps have been taken, but significant gaps remain across most dimensions. A structured assessment will show where to focus first.' },
+      { max:3.5, label:'Basic',       color:'#facc15', bg:'rgba(250,204,21,.08)', desc:'Some areas are progressing, but key dimensions still need structured attention. A roadmap will accelerate your trajectory considerably.' },
+      { max:4.5, label:'Advanced',    color:'#84cc16', bg:'rgba(132,204,22,.08)', desc:'Good progress across the board. The focus is shifting to closing gaps and extending readiness to suppliers and dependent systems.' },
+      { max:6,   label:'Managed',     color:'#34d399', bg:'rgba(52,211,153,.08)', desc:'Strong baseline achieved. Continuous improvement and supplier assurance are the natural next frontier.' },
+    ]
+    const tier = computed(() => { const s = avgScore.value; return tierMap.find(t => s < t.max) || tierMap[tierMap.length-1] })
+
+    const sectorMap = {
+      'Finance & Banking':               'DORA enforcement makes cryptographic agility a regulated requirement — your migration clock is already running.',
+      'Healthcare & Life Sciences':       'Patient data retention periods mean harvest-now-decrypt-later attacks pose a real, long-term confidentiality risk.',
+      'Government & Defence':            'CNSA 2.0 sets firm migration deadlines. Classified and sensitive workloads need quantum-safe transport now.',
+      'Energy & Critical Infrastructure': 'NIS2 critical entity requirements put cryptographic resilience front and centre for operational continuity.',
+      'Technology & Software':           'Your clients\' security postures depend on your cryptographic readiness — supplier assessment requests are already incoming.',
+      'Other':                           'Harvest-now-decrypt-later attacks mean data you protect today could be exposed in a few years.',
+    }
+    const sectorInsight = computed(() => sectorMap[profile.sector] || '')
+
+    const mailtoLink = computed(() => {
+      const subj = encodeURIComponent('Quantum Readiness Profile – '+(profile.sector||'Organisation')+' – '+(profile.size||'Unknown size'))
+      const body = encodeURIComponent(
+        'Hi IREKAI team,\n\nI completed the quick readiness profile on your website. Here are my results:\n\n'+
+        'Organisation profile\n  Sector: '+profile.sector+'\n  Size: '+profile.size+'\n  Primary compliance driver: '+profile.driver+'\n\n'+
+        'Dimension self-ratings (1 = not started, 5 = well advanced)\n'+
+        Object.entries(ratings).map(([k,v])=>'  '+k+': '+v+'/5').join('\n')+'\n\n'+
+        'Estimated maturity tier: '+tier.value.label+' (avg '+avgScore.value.toFixed(1)+'/5)\n\n'+
+        'I\'d like to discuss a full Quantum Readiness Assessment. Please get in touch.\n\nKind regards'
+      )
+      return 'mailto:info@irekai.nl?subject='+subj+'&body='+body
+    })
+
+    function restart() {
+      step.value = 0
+      profile.sector = null; profile.size = null; profile.driver = null
+      Object.keys(ratings).forEach(k => { ratings[k] = 0 })
+    }
+
+    return { router, dialItems, deliverables, steps, areas, dimDefs, sectors, sizes, drivers,
+             step, profile, ratings, profileDone, ratingsDone, avgScore, tier, sectorInsight, mailtoLink, restart }
+  },
+  template: `
+<div>
+  <section class="product-hero">
+    <div class="container">
+      <div class="hero-top">
+        <span class="breadcrumb" @click="router.push('/')">← Back to home</span>
+        <span class="badge badge-teal">Flagship product</span>
+      </div>
+      <div class="hero-body">
+        <div class="hero-text">
+          <div class="section-label" style="margin-bottom:1rem;color:var(--teal);opacity:.85">01 · Quantum Readiness Assessment</div>
+          <h1 class="hero-h1">Know your quantum <em style="color:var(--teal)">exposure. Now.</em></h1>
+          <p class="hero-lead">IREKAI's Quantum Readiness Assessment gives organisations a clear, actionable picture of their cryptographic posture — in 4–6 weeks, not months. Our specialists do the heavy lifting: you get sharp insight and a prioritised roadmap.</p>
+          <div class="hero-actions">
+            <a href="mailto:info@irekai.nl?subject=Quantum Readiness Assessment" class="btn btn-teal" style="font-size:.8rem;padding:.75rem 1.6rem">Request your assessment →</a>
+          </div>
+        </div>
+        <div class="dial-card">
+          <div class="dial-label">Sample output</div>
+          <div class="dial-rings">
+            <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="60" cy="60" r="54" stroke="rgba(41,37,36,1)" stroke-width="12"/>
+              <circle cx="60" cy="60" r="54" stroke="#2dd4bf" stroke-width="12" stroke-dasharray="339.3" stroke-dashoffset="220.5" stroke-linecap="round" transform="rotate(-90 60 60)" style="filter:drop-shadow(0 0 6px rgba(45,212,191,.6))"/>
+              <text x="60" y="56" text-anchor="middle" font-family="'Fraunces',Georgia,serif" font-size="20" fill="#e7e5e4">35</text>
+              <text x="60" y="70" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="7" fill="#78716c" letter-spacing="1">/ 100</text>
+            </svg>
+          </div>
+          <div class="dial-legend">
+            <div class="dial-row" v-for="d in dialItems" :key="d.label">
+              <div class="dial-dot" :style="'background:'+d.color"></div>
+              <span class="dial-name">{{ d.label }}</span>
+              <span class="dial-score" :style="'color:'+d.color">{{ d.score }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="container">
+      <div class="two-col">
+        <div>
+          <div class="section-label" style="margin-bottom:1.25rem">What you get</div>
+          <div class="deliver-list">
+            <div class="deliver-item" v-for="d in deliverables" :key="d.title">
+              <div class="deliver-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg></div>
+              <div><div class="deliver-title">{{ d.title }}</div><div class="deliver-body">{{ d.body }}</div></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="section-label" style="margin-bottom:1.25rem">How it works</div>
+          <div class="steps">
+            <div class="step" v-for="(s,i) in steps" :key="i">
+              <div class="step-num">{{ String(i+1).padStart(2,'0') }}</div>
+              <div><div class="step-title">{{ s.title }}</div><div class="step-body">{{ s.body }}</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="areas-section">
+    <div class="container">
+      <div class="section-label" style="margin-bottom:1.5rem">Assessment dimensions</div>
+      <div class="areas-grid">
+        <div class="area-card" v-for="a in areas" :key="a.code" @mouseenter="e=>e.currentTarget.style.borderColor=a.color" @mouseleave="e=>e.currentTarget.style.borderColor='rgba(255,255,255,.06)'">
+          <div class="area-code fm" :style="'color:'+a.color">{{ a.code }}</div>
+          <div class="area-name fd">{{ a.name }}</div>
+          <div class="area-desc">{{ a.desc }}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Intake questionnaire -->
+  <section class="intake-section">
+    <div class="container">
+
+      <!-- Step 0: intro -->
+      <div class="intake-intro" v-if="step === 0">
+        <div class="badge badge-teal" style="margin-bottom:1.25rem">Quick readiness profile</div>
+        <h3 class="fd intake-heading">Not sure where to start?<br/><em style="color:var(--teal)">Tell us about your situation.</em></h3>
+        <p class="intake-lead">Answer a few quick questions and get a rough readiness profile. We'll use your answers to tailor our approach — and reach back with a concrete proposal that fits your organisation.</p>
+        <button class="btn btn-teal intake-start-btn" @click="step = 1">Get my quick profile →</button>
+      </div>
+
+      <div class="intake-flow" v-else>
+        <!-- Progress indicator -->
+        <div class="intake-progress">
+          <div class="progress-step" :class="{active: step >= 1, done: step > 1}">
+            <div class="progress-dot">
+              <svg v-if="step > 1" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span v-else>1</span>
+            </div>
+            <span class="progress-label">Profile</span>
+          </div>
+          <div class="progress-line" :class="{active: step > 1}"></div>
+          <div class="progress-step" :class="{active: step >= 2, done: step > 2}">
+            <div class="progress-dot">
+              <svg v-if="step > 2" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span v-else>2</span>
+            </div>
+            <span class="progress-label">Self-rating</span>
+          </div>
+          <div class="progress-line" :class="{active: step > 2}"></div>
+          <div class="progress-step" :class="{active: step >= 3}">
+            <div class="progress-dot"><span>3</span></div>
+            <span class="progress-label">Your profile</span>
+          </div>
+        </div>
+
+        <!-- Step 1: profile -->
+        <div class="intake-card" v-if="step === 1">
+          <div class="intake-card-label">Step 1 of 2 — Organisation profile</div>
+          <h4 class="intake-card-heading fd">Tell us about your organisation</h4>
+          <div class="intake-field">
+            <div class="intake-field-label">Sector</div>
+            <div class="pill-group">
+              <button v-for="s in sectors" :key="s" class="pill" :class="{selected: profile.sector===s}" @click="profile.sector=s">{{ s }}</button>
+            </div>
+          </div>
+          <div class="intake-field">
+            <div class="intake-field-label">Organisation size</div>
+            <div class="pill-group">
+              <button v-for="sz in sizes" :key="sz" class="pill" :class="{selected: profile.size===sz}" @click="profile.size=sz">{{ sz }}</button>
+            </div>
+          </div>
+          <div class="intake-field">
+            <div class="intake-field-label">Primary driver for quantum-readiness</div>
+            <div class="pill-group">
+              <button v-for="d in drivers" :key="d" class="pill" :class="{selected: profile.driver===d}" @click="profile.driver=d">{{ d }}</button>
+            </div>
+          </div>
+          <div class="intake-card-footer">
+            <button class="btn btn-ghost intake-back" @click="step=0">← Back</button>
+            <button class="btn btn-teal" style="font-size:.8rem;padding:.7rem 1.5rem" :disabled="!profileDone" @click="step=2">Continue →</button>
+          </div>
+        </div>
+
+        <!-- Step 2: ratings -->
+        <div class="intake-card" v-else-if="step === 2">
+          <div class="intake-card-label">Step 2 of 2 — Dimension self-rating</div>
+          <h4 class="intake-card-heading fd">How would you rate each area?</h4>
+          <p class="intake-subtext">Be honest — this is just a rough indicator. 1 = not started, 5 = well advanced.</p>
+          <div class="ratings-list">
+            <div class="rating-row" v-for="dim in dimDefs" :key="dim.name">
+              <div class="rating-row-left">
+                <span class="rating-dim-dot" :style="'background:'+dim.color"></span>
+                <span class="rating-dim-name">{{ dim.name }}</span>
+              </div>
+              <div class="rating-buttons">
+                <button v-for="n in 5" :key="n"
+                  class="rating-btn"
+                  :class="{ selected: ratings[dim.name]===n, past: ratings[dim.name]>n }"
+                  :style="ratings[dim.name]>=n ? '--dc:'+dim.color : ''"
+                  @click="ratings[dim.name]=n">{{ n }}</button>
+              </div>
+            </div>
+          </div>
+          <div class="rating-scale-hint">
+            <span class="fm" style="font-size:.6rem;color:var(--text-dim)">1 — Not started</span>
+            <span class="fm" style="font-size:.6rem;color:var(--text-dim)">5 — Well advanced</span>
+          </div>
+          <div class="intake-card-footer">
+            <button class="btn btn-ghost intake-back" @click="step=1">← Back</button>
+            <button class="btn btn-teal" style="font-size:.8rem;padding:.7rem 1.5rem" :disabled="!ratingsDone" @click="step=3">See my profile →</button>
+          </div>
+        </div>
+
+        <!-- Step 3: results -->
+        <div class="intake-card results-card" v-else-if="step === 3">
+          <div class="intake-card-label">Your readiness profile</div>
+          <div class="results-tier-row">
+            <div class="results-tier-badge" :style="'background:'+tier.bg+';border-color:'+tier.color+';color:'+tier.color">{{ tier.label }}</div>
+            <div class="results-score fm" :style="'color:'+tier.color">{{ avgScore.toFixed(1) }} <span style="color:var(--text-dim);font-size:.7em">/ 5.0</span></div>
+          </div>
+          <p class="results-insight">{{ tier.desc }}</p>
+          <div class="results-sector-note" v-if="profile.sector">
+            <svg viewBox="0 0 16 16" fill="none" stroke="#2dd4bf" stroke-width="1.5" style="width:14px;height:14px;flex-shrink:0;margin-top:2px"><circle cx="8" cy="8" r="6"/><line x1="8" y1="7" x2="8" y2="11"/><circle cx="8" cy="5" r=".5" fill="#2dd4bf" stroke="none"/></svg>
+            <span>{{ sectorInsight }}</span>
+          </div>
+          <div class="results-dims">
+            <div class="result-dim-row" v-for="dim in dimDefs" :key="dim.name">
+              <span class="result-dim-label fm">{{ dim.name }}</span>
+              <div class="result-dim-bar-track"><div class="result-dim-bar-fill" :style="'width:'+((ratings[dim.name]/5)*100)+'%;background:'+dim.color"></div></div>
+              <span class="result-dim-score fm" :style="'color:'+dim.color">{{ ratings[dim.name] }}/5</span>
+            </div>
+          </div>
+          <p class="results-cta-text">This profile is a rough self-assessment. IREKAI's full assessment uses expert review, technical tooling, and structured interviews to give you a verified, actionable score.</p>
+          <div class="results-actions">
+            <a :href="mailtoLink" class="btn btn-teal" style="font-size:.8rem;padding:.75rem 1.6rem">Request your full assessment →</a>
+            <a href="mailto:info@irekai.nl" class="btn btn-ghost" style="font-size:.8rem;padding:.75rem 1.4rem">Just want to talk</a>
+          </div>
+          <button class="intake-restart fm" @click="restart">← Start over</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>`
+}
+
+/* ──────────────────────────────────────────
+   MATURITY MODEL
+──────────────────────────────────────────── */
+const MaturityModelView = {
+  setup() {
+    const router = useRouter()
+    const tiers = [
+      { n:1, name:'Initial', sub:'Awareness & first steps', risk:'critical', state:'t-done' },
+      { n:2, name:'Basic', sub:'Processes & tooling', risk:'high', state:'t-active' },
+      { n:3, name:'Advanced', sub:'Implementation underway', risk:'medium', state:'' },
+      { n:4, name:'Managed', sub:'Systematic control', risk:'low', state:'' },
+      { n:5, name:'Optimised', sub:'Continuous excellence', risk:'minimal', state:'' },
+    ]
+    const dims = [
+      { code:'01', name:'Crypto Agility', color:'#e879f9', blurb:'Swap algorithms without rewriting systems.' },
+      { code:'02', name:'Asset Inventory', color:'#22d3ee', blurb:'Know what cryptographic assets you have and which are quantum-vulnerable.' },
+      { code:'03', name:'PQC Availability', color:'#34d399', blurb:'Post-quantum algorithms from test environments to production default.' },
+      { code:'04', name:'Governance', color:'#fbbf24', blurb:'Policy, ownership, budget, and compliance driving the migration.' },
+      { code:'05', name:'Supplier Management', color:'#a78bfa', blurb:'Extend quantum-readiness beyond your own estate.' },
+    ]
+    const values = [
+      'A shared language for cryptographic maturity across teams and leadership',
+      '104 concrete activities mapped to maturity tiers and dimensions',
+      'Dependency graph — see which activities unlock which',
+      'Risk profile at each tier across quantum, supply chain, compliance, and operational axes',
+      'Alignment with NIST, BSI, ETSI, NIS2, ISO 27001, and CNSA 2.0',
+      'Export and import of organisational progress for reporting',
+    ]
+    const uses = [
+      { title:'Baseline assessment', body:'Map your current state in a structured workshop. Identify where you are on each dimension without guesswork.' },
+      { title:'Roadmap creation', body:'Use tier requirements and the dependency graph to plan a realistic, sequenced migration roadmap.' },
+      { title:'Board reporting', body:'Translate technical progress into a single maturity score and risk-reduction narrative for leadership.' },
+      { title:'Procurement', body:'Define quantum-readiness requirements for vendors and evaluate their responses against the model.' },
+    ]
+    const formOpen = ref(false)
+    const formDone = ref(false)
+    const form = reactive({ name:'', title:'', company:'', email:'' })
+    const docUrl = '/assets/irekai-pqc-maturity-model.pdf'
+    function openForm(){ formOpen.value=true; formDone.value=false }
+    function closeForm(){ formOpen.value=false }
+    function submitForm(){
+      const subj = encodeURIComponent('Maturity Model Download — '+form.company)
+      const body = encodeURIComponent('New maturity model download:\n\nName: '+form.name+'\nJob title: '+form.title+'\nCompany: '+form.company+'\nEmail: '+form.email)
+      const a = document.createElement('a'); a.href='mailto:info@irekai.nl?subject='+subj+'&body='+body; a.click()
+      formDone.value=true
+    }
+    return { router, tiers, dims, values, uses, formOpen, formDone, form, docUrl, openForm, closeForm, submitForm }
+  },
+  template: `
+<div>
+  <section class="product-hero">
+    <div class="container">
+      <div class="hero-top">
+        <span class="breadcrumb" @click="router.push('/')">← Back to home</span>
+        <span class="badge badge-amber">Framework</span>
+      </div>
+      <div class="hero-body">
+        <div>
+          <div class="section-label" style="margin-bottom:1rem;color:var(--amber);opacity:.85">02 · PQC Migration Maturity Model</div>
+          <h1 class="hero-h1">Five tiers. Five dimensions. <em style="color:var(--amber)">One clear path.</em></h1>
+          <p class="hero-lead">The IREKAI PQC Migration Maturity Model gives you a structured, holistic view of your cryptographic posture — from initial awareness to continuous quantum-safe operations. Each tier builds on the last, with concrete activities and measurable outcomes.</p>
+          <div class="hero-actions">
+            <button @click="openForm" class="btn" style="background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.4);color:var(--amber);font-size:.8rem;padding:.75rem 1.6rem;cursor:pointer">Get the framework →</button>
+            <a href="mailto:info@irekai.nl" class="btn btn-ghost" style="font-size:.8rem;padding:.75rem 1.5rem">Book a demo</a>
+          </div>
+        </div>
+        <div class="tier-preview-card">
+          <div class="fm" style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1rem">Maturity tiers</div>
+          <div class="tiers-mini">
+            <div class="tier-mini" v-for="t in tiers" :key="t.name" :class="t.state">
+              <div class="tier-num-s fm">{{ String(t.n).padStart(2,'0') }}</div>
+              <div><div class="tier-name-s fd">{{ t.name }}</div><div class="tier-sub-s">{{ t.sub }}</div></div>
+              <div class="tier-risk" :class="'risk-'+t.risk">{{ t.risk }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="dims-section">
+    <div class="container">
+      <div class="section-label" style="margin-bottom:1.5rem">Five cryptographic dimensions</div>
+      <div class="dims-grid">
+        <div class="dim-card" v-for="d in dims" :key="d.code" @mouseenter="e=>e.currentTarget.style.borderColor=d.color" @mouseleave="e=>e.currentTarget.style.borderColor='rgba(255,255,255,.06)'">
+          <div class="dim-code fm" :style="'color:'+d.color">{{ d.code }}</div>
+          <div class="dim-name fd">{{ d.name }}</div>
+          <div class="dim-blurb">{{ d.blurb }}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="value-section">
+    <div class="container">
+      <div class="two-col">
+        <div>
+          <div class="section-label" style="margin-bottom:1.25rem">What the model provides</div>
+          <div class="value-list">
+            <div class="value-item" v-for="v in values" :key="v">
+              <div class="value-dot" style="background:var(--amber)"></div><span>{{ v }}</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="section-label" style="margin-bottom:1.25rem">How organisations use it</div>
+          <div class="use-list">
+            <div v-for="u in uses" :key="u.title"><div class="use-title">{{ u.title }}</div><div class="use-body">{{ u.body }}</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="teaser-section">
+    <div class="container">
+      <div class="badge badge-amber" style="margin-bottom:.75rem">Interactive preview</div>
+      <h3 class="fd" style="font-size:1.3rem;color:var(--text);margin-bottom:.5rem">PQC Migration Tech Tree</h3>
+      <p class="prose" style="margin-bottom:1.5rem">A live preview of the maturity model — 104 activities across 5 dimensions and 5 tiers, with a dependency map showing which steps unlock which. Fill in your details to unlock the full interactive version.</p>
+      <div style="position:relative;border-radius:14px;overflow:hidden;border:1px solid rgba(251,191,36,.2);background:#0c0a09;height:clamp(380px,55vw,580px)">
+        <iframe src="public/assets/pqc-teaser.html" style="width:100%;height:100%;border:none;display:block;pointer-events:none" title="PQC Tech Tree preview" loading="lazy" scrolling="no"></iframe>
+        <div style="position:absolute;bottom:0;left:0;right:0;height:110px;background:linear-gradient(to bottom,transparent,rgba(12,10,9,.93) 60%);display:flex;align-items:flex-end;justify-content:center;padding-bottom:1.5rem">
+          <button @click="openForm" class="btn" style="background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.4);color:var(--amber);font-size:.8rem;padding:.7rem 1.5rem;cursor:pointer">Get full access →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Access modal -->
+  <div class="modal-backdrop" v-if="formOpen" @click.self="closeForm">
+    <div class="modal-card">
+      <template v-if="!formDone">
+        <button class="modal-close-btn" @click="closeForm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        <div class="modal-lbl amber">Free access</div>
+        <h3 class="modal-hdg">Get the PQC Maturity Model</h3>
+        <p class="modal-sub">Fill in your details and the framework is yours immediately.</p>
+        <form class="access-form" @submit.prevent="submitForm">
+          <div class="form-row">
+            <div class="form-field"><label class="form-lbl">Name</label><input v-model="form.name" type="text" class="form-inp" placeholder="Jane Smith" required /></div>
+            <div class="form-field"><label class="form-lbl">Job title</label><input v-model="form.title" type="text" class="form-inp" placeholder="CISO" required /></div>
+          </div>
+          <div class="form-field"><label class="form-lbl">Company</label><input v-model="form.company" type="text" class="form-inp" placeholder="Acme Corp" required /></div>
+          <div class="form-field"><label class="form-lbl">Work email</label><input v-model="form.email" type="email" class="form-inp" placeholder="jane@acme.com" required /></div>
+          <button type="submit" class="form-submit amber">Get instant access →</button>
+        </form>
+      </template>
+      <template v-else>
+        <div class="modal-success">
+          <div class="success-icon amber"><svg viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          <h3 class="modal-hdg">You're in, {{ form.name.split(' ')[0] }}.</h3>
+          <p class="modal-sub">Your copy of the IREKAI PQC Migration Maturity Model is ready.</p>
+          <a :href="docUrl" download class="form-submit amber" style="text-align:center">↓ Download framework</a>
+          <p class="modal-note">A copy will also be sent to {{ form.email }} within 24 hours.</p>
+          <button class="modal-close-txt" @click="closeForm">Close</button>
+        </div>
+      </template>
+    </div>
+  </div>
+</div>`
+}
+
+/* ──────────────────────────────────────────
+   SUPPLIER MANAGEMENT
+──────────────────────────────────────────── */
+const SupplierManagementView = {
+  setup() {
+    const router = useRouter()
+    const formOpen = ref(false); const formDone = ref(false)
+    const form = reactive({ name:'', title:'', company:'', email:'' })
+    const docUrl = '/assets/irekai-supplier-management-overview.pdf'
+    function openForm(){ formOpen.value=true; formDone.value=false }
+    function closeForm(){ formOpen.value=false }
+    function submitForm(){
+      const subj = encodeURIComponent('Supplier Management Programme — '+form.company)
+      const body = encodeURIComponent('Programme request:\n\nName: '+form.name+'\nJob title: '+form.title+'\nCompany: '+form.company+'\nEmail: '+form.email)
+      const a = document.createElement('a'); a.href='mailto:info@irekai.nl?subject='+subj+'&body='+body; a.click()
+      formDone.value=true
+    }
+    const supplyTiers = [
+      { label:'Tier 1 — Critical software vendors', fill:92, color:'#f87171', risk:'Critical' },
+      { label:'Tier 2 — Hardware & HSM suppliers', fill:75, color:'#fb923c', risk:'High' },
+      { label:'Tier 3 — SaaS & cloud services', fill:68, color:'#fbbf24', risk:'High' },
+      { label:'Tier 4 — OT / IoT suppliers', fill:55, color:'#fbbf24', risk:'Medium' },
+      { label:'Tier 5 — Long-tail vendors', fill:40, color:'#a3e635', risk:'Medium' },
+    ]
+    const phases = [
+      { phase:1, name:'Discovery & Scoping', desc:'Identify and classify all third-party cryptographic dependencies.', items:['Critical vendor catalogue','SBOM/CBOM intake','Dependency risk tier assignment'] },
+      { phase:2, name:'Assessment', desc:'Structured questionnaires and workshops to evaluate vendor posture.', items:['Vendor crypto questionnaire','Workshop facilitation','PQC roadmap documentation'] },
+      { phase:3, name:'Requirements & Contracting', desc:'Embed quantum-readiness into procurement and existing agreements.', items:['Contract language templates','PQC procurement clauses','Remediation timelines'] },
+      { phase:4, name:'Monitoring & Assurance', desc:'Ongoing visibility into supplier quantum posture.', items:['Supplier migration tracker','Continuous CBOM monitoring','Escalation process'] },
+    ]
+    const outcomes = [
+      'Full visibility into third-party cryptographic exposure',
+      'PQC requirements embedded in all new and renewed contracts',
+      'Prioritised vendor remediation roadmap',
+      'Continuous SBOM/CBOM-driven monitoring',
+      'Audit-ready evidence of supply chain quantum governance',
+      'Escalation process for non-compliant vendors',
+    ]
+    return { router, supplyTiers, phases, outcomes, formOpen, formDone, form, docUrl, openForm, closeForm, submitForm }
+  },
+  template: `
+<div>
+  <section class="product-hero">
+    <div class="container">
+      <div class="hero-top">
+        <span class="breadcrumb" @click="router.push('/')">← Back to home</span>
+        <span class="badge badge-violet">Programme</span>
+      </div>
+      <div class="hero-body">
+        <div>
+          <div class="section-label" style="margin-bottom:1rem;color:var(--violet);opacity:.85">03 · Supplier Management Programme</div>
+          <h1 class="hero-h1">Your perimeter ends <em style="color:var(--violet)">where your vendors begin.</em></h1>
+          <p class="hero-lead">Third-party cryptographic risk is one of the most underestimated exposure surfaces in the quantum transition. IREKAI's programme gives you structured tools, templates, and processes to extend quantum-readiness across your entire supply chain.</p>
+          <div class="hero-actions">
+            <button @click="openForm" class="btn" style="background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.4);color:var(--violet);font-size:.8rem;padding:.75rem 1.6rem;cursor:pointer">Get the programme overview →</button>
+            <a href="mailto:info@irekai.nl" class="btn btn-ghost" style="font-size:.8rem;padding:.75rem 1.5rem">Learn more</a>
+          </div>
+        </div>
+        <div class="supply-card">
+          <div class="fm" style="font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1.25rem">Supply chain risk tiers</div>
+          <div class="supply-tiers">
+            <div class="supply-tier" v-for="t in supplyTiers" :key="t.label">
+              <div class="supply-info" style="margin-bottom:.25rem">
+                <span class="supply-label-s">{{ t.label }}</span>
+                <span class="supply-pct" :style="'color:'+t.color">{{ t.risk }}</span>
+              </div>
+              <div class="supply-bar-wrap" style="background:rgba(41,37,36,.8);border-radius:2px;overflow:hidden">
+                <div style="height:3px;border-radius:2px;transition:width 1s ease" :style="'width:'+t.fill+'%;background:'+t.color"></div>
+              </div>
+            </div>
+          </div>
+          <div class="supply-note">Risk exposure across vendor categories before programme implementation.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="phases-section">
+    <div class="container">
+      <div class="section-label" style="margin-bottom:1.5rem">Programme phases</div>
+      <div class="phases-grid">
+        <div class="phase-card" v-for="p in phases" :key="p.phase">
+          <div class="phase-num">Phase {{ p.phase }}</div>
+          <div class="phase-name fd">{{ p.name }}</div>
+          <div class="phase-desc">{{ p.desc }}</div>
+          <ul class="phase-items"><li v-for="i in p.items" :key="i">{{ i }}</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="included-section">
+    <div class="container">
+      <div class="two-col">
+        <div>
+          <div class="section-label" style="margin-bottom:1.25rem">Key outcomes</div>
+          <div class="outcomes">
+            <div class="outcome" v-for="o in outcomes" :key="o">
+              <span class="outcome-check" style="color:var(--violet)">✓</span><span>{{ o }}</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="badge badge-violet" style="margin-bottom:1rem">Free download</div>
+          <h3 class="fd" style="font-size:1.2rem;margin-bottom:.6rem;color:var(--text)">Programme overview</h3>
+          <p class="prose" style="margin-bottom:1.5rem">A high-level overview of the programme including the assessment framework and sample deliverables.</p>
+          <button @click="openForm" class="btn" style="background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.4);color:var(--violet);font-size:.8rem;cursor:pointer">Get the overview →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Access modal -->
+  <div class="modal-backdrop" v-if="formOpen" @click.self="closeForm">
+    <div class="modal-card violet-modal">
+      <template v-if="!formDone">
+        <button class="modal-close-btn" @click="closeForm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        <div class="modal-lbl violet">Free access</div>
+        <h3 class="modal-hdg">Get the Supplier Management Overview</h3>
+        <p class="modal-sub">Fill in your details and the programme overview is yours immediately.</p>
+        <form class="access-form" @submit.prevent="submitForm">
+          <div class="form-row">
+            <div class="form-field"><label class="form-lbl">Name</label><input v-model="form.name" type="text" class="form-inp vi" placeholder="Jane Smith" required /></div>
+            <div class="form-field"><label class="form-lbl">Job title</label><input v-model="form.title" type="text" class="form-inp vi" placeholder="CISO" required /></div>
+          </div>
+          <div class="form-field"><label class="form-lbl">Company</label><input v-model="form.company" type="text" class="form-inp vi" placeholder="Acme Corp" required /></div>
+          <div class="form-field"><label class="form-lbl">Work email</label><input v-model="form.email" type="email" class="form-inp vi" placeholder="jane@acme.com" required /></div>
+          <button type="submit" class="form-submit violet">Get instant access →</button>
+        </form>
+      </template>
+      <template v-else>
+        <div class="modal-success">
+          <div class="success-icon violet"><svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          <h3 class="modal-hdg">You're in, {{ form.name.split(' ')[0] }}.</h3>
+          <p class="modal-sub">Your copy of the Supplier Management Programme overview is ready.</p>
+          <a :href="docUrl" download class="form-submit violet" style="text-align:center">↓ Download overview</a>
+          <p class="modal-note">A copy will also be sent to {{ form.email }} within 24 hours.</p>
+          <button class="modal-close-txt" @click="closeForm">Close</button>
+        </div>
+      </template>
+    </div>
+  </div>
+</div>`
+}
+
+/* ──────────────────────────────────────────
+   CODE SCANNING
+──────────────────────────────────────────── */
+const CodeScanningView = {
+  setup() {
+    const router = useRouter()
+    const formOpen = ref(false); const formDone = ref(false)
+    const form = reactive({ name:'', title:'', company:'', email:'' })
+    const docUrl = '/assets/irekai-code-scanner-beta.pdf'
+    function openForm(){ formOpen.value=true; formDone.value=false }
+    function closeForm(){ formOpen.value=false }
+    function submitForm(){
+      const subj = encodeURIComponent('Code Scanner Beta — '+form.company)
+      const body = encodeURIComponent('Beta access request:\n\nName: '+form.name+'\nJob title: '+form.title+'\nCompany: '+form.company+'\nEmail: '+form.email)
+      const a = document.createElement('a'); a.href='mailto:info@irekai.nl?subject='+subj+'&body='+body; a.click()
+      formDone.value=true
+    }
+    const detects = [
+      { title:'Deprecated & weak algorithms', body:'Identifies MD5, SHA-1, DES, RC4, AES-ECB, RSA < 2048-bit and other deprecated primitives.', examples:['MD5','SHA-1','DES','RC4'], icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>` },
+      { title:'Quantum-vulnerable key exchange', body:'Flags classical Diffie-Hellman, ECDH, and RSA key exchange that are vulnerable to Shor\'s algorithm.', examples:['RSA','ECDH','DH','ECDSA'], icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>` },
+      { title:'Hardcoded algorithms & keys', body:'Detects algorithm names, key material, and configuration strings hardcoded in source files.', examples:['"AES-256"','"rsa"','key literals'], icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>` },
+      { title:'Dependency crypto exposure', body:'Cross-references your SBOM with known cryptographic capabilities of third-party libraries.', examples:['openssl','bouncycastle','cryptography'], icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>` },
+    ]
+    const langs = ['Python','Java','Go','C / C++','JavaScript','TypeScript','Rust','C#','.NET','Kotlin']
+    return { router, detects, langs, formOpen, formDone, form, docUrl, openForm, closeForm, submitForm }
+  },
+  template: `
+<div>
+  <section class="product-hero">
+    <div class="container">
+      <div class="hero-top">
+        <span class="breadcrumb" @click="router.push('/')">← Back to home</span>
+        <span class="badge badge-fuchsia">Coming soon</span>
+      </div>
+      <div class="hero-body">
+        <div>
+          <div class="section-label" style="margin-bottom:1rem;color:var(--fuchsia);opacity:.85">04 · Cryptographic Code Scanner</div>
+          <h1 class="hero-h1">Every algorithm. <em style="color:var(--fuchsia)">Every dependency. Found.</em></h1>
+          <p class="hero-lead">Deep static analysis of your codebase to identify every cryptographic primitive, hardcoded algorithm, and quantum-vulnerable dependency. The result is a machine-readable CBOM and an actionable agility report.</p>
+          <div class="hero-actions">
+            <button @click="openForm" class="btn" style="background:rgba(232,121,249,.1);border-color:rgba(232,121,249,.4);color:var(--fuchsia);font-size:.8rem;padding:.75rem 1.6rem;cursor:pointer">Join the beta →</button>
+            <a href="mailto:info@irekai.nl" class="btn btn-ghost" style="font-size:.8rem;padding:.75rem 1.5rem">Request a demo</a>
+          </div>
+        </div>
+        <div class="terminal-card">
+          <div class="terminal-bar">
+            <div class="term-dots"><span style="background:#f87171"></span><span style="background:#fbbf24"></span><span style="background:#34d399"></span></div>
+            <div class="term-title-s">irekai-scan v0.9.0</div>
+          </div>
+          <div class="term-body">
+            <div class="tline"><span class="prompt">$</span>irekai-scan --path ./src --output cbom.json</div>
+            <div class="tline dim">Scanning 2,847 files...</div>
+            <div class="tline"></div>
+            <div class="tline green">✓ RSA-2048 found in 14 files</div>
+            <div class="tline red">✗ AES-128-CBC (deprecated) — 6 locations</div>
+            <div class="tline red">✗ MD5 hash usage — 3 locations</div>
+            <div class="tline amber">⚠ EC-P256 — quantum-vulnerable — 22 locations</div>
+            <div class="tline dim">Found 0 ML-KEM / ML-DSA implementations</div>
+            <div class="tline"></div>
+            <div class="tline dim">Generating CBOM...</div>
+            <div class="tline green">✓ cbom.json written (CycloneDX 1.5)</div>
+            <div class="tline"></div>
+            <div class="tline red bold">Crypto Agility Score: 2.1 / 10</div>
+            <div class="tline red bold">Quantum Risk: CRITICAL</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="detects-section">
+    <div class="container">
+      <div class="section-label" style="margin-bottom:1.5rem">Detection capabilities</div>
+      <div class="detects-grid">
+        <div class="detect-card" v-for="d in detects" :key="d.title">
+          <div class="detect-icon" v-html="d.icon"></div>
+          <div class="detect-title">{{ d.title }}</div>
+          <div class="detect-body">{{ d.body }}</div>
+          <div class="detect-exs"><span class="detect-ex" v-for="e in d.examples" :key="e">{{ e }}</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="output-section">
+    <div class="container">
+      <div class="two-col">
+        <div>
+          <div class="section-label" style="margin-bottom:1.25rem">What you receive</div>
+          <div class="output-list">
+            <div class="out-item"><div class="out-num">01</div><div><div class="out-title">CBOM (CycloneDX 1.5)</div><div class="out-body">Machine-readable Cryptographic Bill of Materials listing every asset and its quantum risk classification.</div></div></div>
+            <div class="out-item"><div class="out-num">02</div><div><div class="out-title">Crypto Agility Score</div><div class="out-body">A composite 0–10 score measuring how easily your codebase can swap cryptographic algorithms.</div></div></div>
+            <div class="out-item"><div class="out-num">03</div><div><div class="out-title">Quantum Risk Report</div><div class="out-body">Ranked list of quantum-vulnerable usage with business impact assessment and remediation guidance.</div></div></div>
+            <div class="out-item"><div class="out-num">04</div><div><div class="out-title">CI/CD integration</div><div class="out-body">Configuration files for GitHub Actions, GitLab CI, and Jenkins to scan every pull request.</div></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="section-label" style="margin-bottom:1.25rem">Supported languages</div>
+          <div class="langs-grid">
+            <div class="lang-pill" v-for="l in langs" :key="l">{{ l }}</div>
+          </div>
+          <div class="section-label" style="margin-top:2rem;margin-bottom:.75rem">Integration</div>
+          <div class="integ-list">
+            <div class="integ" v-for="i in ['GitHub Actions','GitLab CI','Jenkins','Azure DevOps','JIRA (findings)','VS Code extension (beta)']" :key="i">
+              <div class="integ-dot" style="background:var(--fuchsia)"></div><span>{{ i }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="beta-section">
+    <div class="container">
+      <div class="beta-card" style="background:rgba(232,121,249,.03);border:1px solid rgba(232,121,249,.2)">
+        <div class="badge badge-fuchsia" style="margin-bottom:1rem">Private beta</div>
+        <h3 class="fd" style="font-size:1.4rem;margin-bottom:.75rem;color:var(--text)">Be first to scan your codebase</h3>
+        <p class="prose" style="margin-bottom:1.5rem">Beta participants get early access, direct input into the roadmap, and preferential pricing at launch.</p>
+        <button @click="openForm" class="btn" style="background:rgba(232,121,249,.1);border-color:rgba(232,121,249,.4);color:var(--fuchsia);font-size:.8rem;cursor:pointer">Apply for beta access →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Access modal -->
+  <div class="modal-backdrop" v-if="formOpen" @click.self="closeForm">
+    <div class="modal-card fuchsia-modal">
+      <template v-if="!formDone">
+        <button class="modal-close-btn" @click="closeForm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        <div class="modal-lbl fuchsia">Private beta</div>
+        <h3 class="modal-hdg">Join the Code Scanner beta</h3>
+        <p class="modal-sub">Tell us about yourself and we'll confirm your beta spot immediately.</p>
+        <form class="access-form" @submit.prevent="submitForm">
+          <div class="form-row">
+            <div class="form-field"><label class="form-lbl">Name</label><input v-model="form.name" type="text" class="form-inp fu" placeholder="Jane Smith" required /></div>
+            <div class="form-field"><label class="form-lbl">Job title</label><input v-model="form.title" type="text" class="form-inp fu" placeholder="Lead Engineer" required /></div>
+          </div>
+          <div class="form-field"><label class="form-lbl">Company</label><input v-model="form.company" type="text" class="form-inp fu" placeholder="Acme Corp" required /></div>
+          <div class="form-field"><label class="form-lbl">Work email</label><input v-model="form.email" type="email" class="form-inp fu" placeholder="jane@acme.com" required /></div>
+          <button type="submit" class="form-submit fuchsia">Confirm my beta spot →</button>
+        </form>
+      </template>
+      <template v-else>
+        <div class="modal-success">
+          <div class="success-icon fuchsia"><svg viewBox="0 0 24 24" fill="none" stroke="#e879f9" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          <h3 class="modal-hdg">You're on the list, {{ form.name.split(' ')[0] }}.</h3>
+          <p class="modal-sub">We'll be in touch at {{ form.email }} with next steps as the beta opens up.</p>
+          <button class="modal-close-txt" @click="closeForm">Close</button>
+        </div>
+      </template>
+    </div>
+  </div>
+</div>`
+}
+
+/* ──────────────────────────────────────────
+   ABOUT
+──────────────────────────────────────────── */
+const AboutView = {
+  setup() {
+    const router = useRouter()
+    const mission = [
+      { title:'Expert-led', body:'Our team combines academic cryptographic research with hands-on migration experience across multiple domains.', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>' },
+      { title:'Compliancy-first', body:'Every IREKAI engagement produces tangible compliance evidence. Demonstrate your quantum-readiness posture to auditors, regulators, and clients — aligned with NIS2, DORA, ISO 27001, and CNSA 2.0.', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>' },
+      { title:'Practical focus', body:"We don't produce shelf reports. Every IREKAI engagement ends with tools, templates, and a concrete plan your team can execute — without a permanent consulting retainer.", icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>' },
+    ]
+    const standards = [
+      { name:'NIST FIPS 203/204/205', body:'ML-KEM, ML-DSA, SLH-DSA — the standardised post-quantum algorithms our work is built on.' },
+      { name:'CNSA 2.0', body:'US National Security Systems Committee algorithm requirements and timelines.' },
+      { name:'BSI TR-02102', body:'German Federal Office for Information Security cryptographic guidelines.' },
+      { name:'ANSSI', body:'French cybersecurity agency recommendations for PQC migration.' },
+      { name:'ETSI / ISO', body:'European and international standardisation body guidance on quantum-safe cryptography.' },
+      { name:'EU NIS2 / DORA', body:'EU regulatory requirements for cybersecurity risk management, including cryptographic controls.' },
+      { name:'ISO 27001', body:'Annex A cryptographic controls and evidence requirements for compliance.' },
+      { name:'CycloneDX CBOM', body:'Cryptographic Bill of Materials standard for machine-readable crypto asset inventory.' },
+    ]
+    return { router, mission, standards }
+  },
+  template: `
+<div>
+  <section class="product-hero">
+    <div class="container">
+      <div style="margin-bottom:2.5rem"><span class="breadcrumb" @click="router.push('/')">← Back to home</span></div>
+      <div class="about-hero-body">
+        <div>
+          <div class="section-label" style="margin-bottom:1rem">About IREKAI</div>
+          <h1 class="fd" style="font-size:clamp(2rem,5vw,3.2rem);font-weight:500;line-height:1.15;color:var(--text);margin-bottom:1.25rem">
+            Helping organisations <em style="color:#7aad97">navigate the quantum transition.</em>
+          </h1>
+          <div class="prose">
+            <p>IREKAI is a post-quantum cryptography consultancy and tooling provider. We work with organisations of all sizes — from scale-ups to critical infrastructure operators — to assess, plan, and execute their migration to quantum-safe cryptography.</p>
+            <p>Quantum computing is not a distant threat. The harvest-now-decrypt-later (HNDL) attack vector means your encrypted data is at risk today, even if cryptographically-relevant quantum computers are still years away. In addition, a full migration is estimated to take 5–10 years. IREKAI helps you act now, pragmatically.</p>
+            <p>We combine deep cryptographic expertise with practical engineering. Our frameworks are grounded in NIST FIPS 203/204/205, BSI, ANSSI, and EU regulatory requirements — and are kept refined through real migration engagements.</p>
+          </div>
+        </div>
+
+        <!-- Etymology card: static origin story -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:0;padding:2rem 2.5rem 1.75rem;border:1px solid var(--border);border-radius:14px;background:rgba(28,25,23,0.5);min-width:240px">
+          <div style="display:flex;align-items:flex-start;gap:1.25rem;width:100%;justify-content:center">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:0.35rem">
+              <span style="font-family:var(--fg);font-size:1.25rem;font-weight:400;color:#7aad97;opacity:.85;letter-spacing:.02em">ἠρεμία</span>
+              <span style="font-family:var(--fg);font-size:.8rem;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--text-muted)">IREMIA</span>
+              <span style="font-family:var(--fm);font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);text-align:center;line-height:1.5">Greek · peace of mind</span>
+            </div>
+            <div style="width:1px;height:3rem;background:var(--border);margin-top:.5rem;opacity:.6"></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:0.35rem">
+              <span style="font-family:var(--fg);font-size:1.25rem;font-weight:400;color:#7aad97;opacity:.85;letter-spacing:.02em">意気概</span>
+              <span style="font-family:var(--fg);font-size:.8rem;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--text-muted)">IKIGAI</span>
+              <span style="font-family:var(--fm);font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);text-align:center;line-height:1.5">Japanese · purpose</span>
+            </div>
+          </div>
+          <div style="margin:.75rem 0;opacity:.45">
+            <svg width="16" height="22" viewBox="0 0 24 32" fill="none" stroke="#7aad97" stroke-width="1.2">
+              <line x1="12" y1="0" x2="12" y2="28"/><path d="M6 22l6 8 6-8"/>
+            </svg>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:.6rem">
+            <svg style="width:64px;height:64px;filter:drop-shadow(0 0 14px rgba(122,173,151,.3))" viewBox="0 0 200 200" fill="none">
+              <defs>
+                <pattern id="ab2-lat" x="0" y="0" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(45 100 100)"><circle cx="0" cy="0" r="1.3" fill="#7aad97" fill-opacity=".55"/></pattern>
+                <clipPath id="ab2-clip"><rect x="69" y="69" width="62" height="62"/></clipPath>
+              </defs>
+              <rect x="28" y="28" width="144" height="144" fill="none" stroke="#7aad97" stroke-width="1.6"/>
+              <g stroke="#7aad97" stroke-width="1.1" stroke-opacity=".65" stroke-linecap="square">
+                <line x1="17" y1="28" x2="28" y2="28"/><line x1="28" y1="17" x2="28" y2="28"/>
+                <line x1="172" y1="28" x2="183" y2="28"/><line x1="172" y1="17" x2="172" y2="28"/>
+                <line x1="172" y1="172" x2="183" y2="172"/><line x1="172" y1="172" x2="172" y2="183"/>
+                <line x1="17" y1="172" x2="28" y2="172"/><line x1="28" y1="172" x2="28" y2="183"/>
+              </g>
+              <rect x="69" y="69" width="62" height="62" fill="url(#ab2-lat)" clip-path="url(#ab2-clip)"/>
+              <rect x="68" y="68" width="64" height="64" fill="none" stroke="#7aad97" stroke-width=".9" stroke-opacity=".42"/>
+              <g stroke="#7aad97" stroke-opacity=".22" stroke-width=".7"><line x1="100" y1="68" x2="100" y2="132"/><line x1="68" y1="100" x2="132" y2="100"/></g>
+              <circle cx="100" cy="100" r="6.5" fill="none" stroke="#7aad97" stroke-width="1.1" stroke-opacity=".74"/>
+              <circle cx="100" cy="100" r="2.7" fill="#7aad97"/>
+            </svg>
+            <span style="font-family:var(--fg);font-size:1.75rem;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--text)">IREKAI</span>
+            <span style="font-family:var(--fg);font-style:italic;font-size:.82rem;color:var(--text-dim);letter-spacing:.02em;text-align:center">Clarity first. Migrate with confidence.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mission-section">
+    <div class="container">
+      <div class="mission-grid">
+        <div class="mission-item" v-for="m in mission" :key="m.title">
+          <div class="mission-icon" v-html="m.icon"></div>
+          <div><div class="mission-title">{{ m.title }}</div><div class="mission-body">{{ m.body }}</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="standards-section">
+    <div class="container">
+      <div class="section-label" style="margin-bottom:1.25rem">Standards &amp; frameworks alignment</div>
+      <div class="standards-grid">
+        <div class="std-card" v-for="s in standards" :key="s.name">
+          <div class="std-name">{{ s.name }}</div>
+          <div class="std-body">{{ s.body }}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact-section">
+    <div class="container">
+      <div class="contact-card">
+        <div>
+          <h3 class="fd" style="font-size:1.5rem;margin-bottom:.6rem;color:var(--text)">Get in touch</h3>
+          <p class="prose" style="max-width:48ch">Whether you're taking first steps or mid-migration, we're happy to discuss your situation and how IREKAI can help.</p>
+        </div>
+        <div class="contact-actions">
+          <a href="mailto:info@irekai.nl" class="btn btn-sage" style="font-size:.8rem;padding:.75rem 1.5rem">info@irekai.nl →</a>
+          <a href="https://irekai.nl" target="_blank" rel="noopener" class="btn btn-ghost" style="font-size:.8rem;padding:.75rem 1.5rem">irekai.nl ↗</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>`
+}
+
+/* ──────────────────────────────────────────
+   ROUTER & APP
+──────────────────────────────────────────── */
+const routes = [
+  { path: '/',                              component: HomeView },
+  { path: '/about',                         component: AboutView },
+  { path: '/products/quantum-readiness',    component: QuantumReadinessView },
+  { path: '/products/maturity-model',       component: MaturityModelView },
+  { path: '/products/supplier-management',  component: SupplierManagementView },
+  { path: '/products/code-scanning',        component: CodeScanningView },
+]
+
+const router = createRouter({
+  history: createWebHashHistory(),
+  routes,
+  scrollBehavior(to, from, saved) {
+    if (saved) return saved
+    return { top: 0 }
+  }
+})
+
+router.afterEach((to) => {
+  const titles = {
+    '/': 'IREKAI — Post-Quantum Security',
+    '/about': 'About — IREKAI',
+    '/products/quantum-readiness': 'Quantum Readiness — IREKAI',
+    '/products/maturity-model': 'PQC Maturity Model — IREKAI',
+    '/products/supplier-management': 'Supplier Management — IREKAI',
+    '/products/code-scanning': 'Code Scanner — IREKAI',
+  }
+  document.title = titles[to.path] || 'IREKAI'
+})
+
+const App = {
+  components: { NavBar, SiteFooter },
+  template: `
+<div class="grid-bg" style="min-height:100vh;display:flex;flex-direction:column">
+  <NavBar/>
+  <main style="flex:1">
+    <router-view v-slot="{ Component }">
+      <transition name="v" mode="out-in">
+        <component :is="Component" :key="$route.path"/>
+      </transition>
+    </router-view>
+  </main>
+  <SiteFooter/>
+</div>`
+}
+
+createApp(App).use(router).mount('#app')
+</script>
+</body>
+</html>
