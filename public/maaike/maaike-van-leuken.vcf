@@ -1,0 +1,12 @@
+BEGIN:VCARD
+VERSION:3.0
+N:van Leuken;Maaike;;;
+FN:Maaike van Leuken
+ORG:IREKAI
+TITLE:Founder and Cryptographer
+EMAIL;TYPE=INTERNET,WORK:maaike@irekai.nl
+TEL;TYPE=CELL,VOICE:+31622310605
+URL:https://irekai.nl
+ADR;TYPE=WORK:;;;Son en Breugel;;;Netherlands
+NOTE:Clarity first. Migrate with confidence.
+END:VCARD

@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#ebe7dd">
+<title>Maaike van Leuken — IREKAI</title>
+<meta name="description" content="Maaike van Leuken — Founder and Cryptographer at IREKAI. Clarity first. Migrate with confidence.">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Maaike van Leuken — IREKAI">
+<meta property="og:description" content="Founder and Cryptographer. Clarity first. Migrate with confidence.">
+<meta property="og:type" content="profile">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg-light: #f0ebe3;        /* Parchment */
+  --bg-dark: #0c0a09;         /* Obsidian */
+  --ink: #1c1917;             /* Charcoal */
+  --ink-soft: #78716c;        /* Stone-2 */
+  --stone: #a8a29e;           /* Stone */
+  --sage: #7aad97;            /* Sage (on dark) */
+  --verdigris: #4e8a74;       /* Verdigris (on light) */
+  --paper: #f0ebe3;
+  --grid-light: rgba(0,0,0,0.06);
+  --grid-dark: rgba(231,229,228,0.05);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  background: var(--paper);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px 32px;
+  position: relative;
+  background-image:
+    radial-gradient(circle at 1px 1px, var(--grid-light) 1px, transparent 0);
+  background-size: 28px 28px;
+}
+
+/* ============== CARD CONTAINER ============== */
+.card-stage {
+  perspective: 1600px;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1.55 / 1;
+  transform-style: preserve-3d;
+  transition: transform 0.9s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+  cursor: pointer;
+  will-change: transform;
+}
+
+.card.flipped {
+  transform: rotateY(180deg);
+}
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.04),
+    0 10px 30px -8px rgba(0,0,0,0.25),
+    0 30px 60px -20px rgba(0,0,0,0.18);
+}
+
+/* ============== FRONT FACE ============== */
+.face-front {
+  background: var(--paper);
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(0,0,0,0.08) 1px, transparent 0);
+  background-size: 22px 22px;
+  padding: 22px 22px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.front-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.front-name-block {
+  flex: 1;
+  min-width: 0;
+}
+
+.front-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.6rem, 7vw, 2.1rem);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.front-role {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  color: var(--verdigris);
+  margin-top: 10px;
+  text-transform: uppercase;
+}
+
+.front-mark {
+  flex-shrink: 0;
+  width: 78px;
+  height: 78px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.95;
+}
+
+.front-mark svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.front-divider {
+  height: 1px;
+  background: rgba(0,0,0,0.12);
+  margin: 14px 0 12px;
+}
+
+.front-info {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 8px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+}
+
+.info-label {
+  color: var(--verdigris);
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  align-self: center;
+  text-transform: uppercase;
+}
+
+.info-value {
+  color: var(--ink);
+  align-self: center;
+  word-break: break-word;
+}
+
+/* ============== BACK FACE ============== */
+.face-back {
+  background: var(--bg-dark);
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  background-image:
+    radial-gradient(circle at 1px 1px, var(--grid-dark) 1px, transparent 0);
+  background-size: 22px 22px;
+  position: relative;
+}
+
+.back-logo {
+  width: 88px;
+  height: 88px;
+  margin-bottom: 22px;
+  opacity: 0.95;
+}
+
+.back-wordmark {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2.2rem, 9vw, 2.8rem);
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  color: #f0ebe3;
+  padding-left: 0.2em; /* optical balance for letter-spacing */
+  text-transform: uppercase;
+}
+
+.back-tagline {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: 0.95rem;
+  color: #a8a29e;
+  margin-top: 14px;
+  text-align: center;
+  letter-spacing: 0.01em;
+}
+
+/* ============== FLIP HINT ============== */
+.flip-hint {
+  margin-top: 18px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  color: var(--ink-soft);
+  text-align: center;
+  text-transform: uppercase;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+  user-select: none;
+}
+
+.flip-hint::before {
+  content: "↻ ";
+  display: inline-block;
+  margin-right: 4px;
+}
+
+/* ============== ACTIONS ============== */
+.actions {
+  margin-top: 28px;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 20px;
+  border-radius: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.btn-primary {
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.22);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--ink);
+  border-color: rgba(0,0,0,0.18);
+}
+
+.btn-secondary:hover {
+  background: rgba(0,0,0,0.04);
+  border-color: rgba(0,0,0,0.3);
+}
+
+.btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* ============== TOAST ============== */
+.toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(120%);
+  background: var(--ink);
+  color: var(--paper);
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+  z-index: 100;
+  pointer-events: none;
+}
+
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ============== ENTRANCE ANIMATION ============== */
+@keyframes cardEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card-stage {
+  animation: cardEntrance 0.8s cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
+}
+
+.flip-hint {
+  animation: fadeUp 0.6s ease 0.6s both;
+}
+
+.actions {
+  animation: fadeUp 0.6s ease 0.8s both;
+}
+
+/* ============== FOOTER ============== */
+.footer {
+  margin-top: 36px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  color: var(--ink-soft);
+  opacity: 0.5;
+  text-transform: uppercase;
+  animation: fadeUp 0.6s ease 1s both;
+}
+
+/* ============== DESKTOP TWEAKS ============== */
+@media (min-width: 600px) {
+  body { padding: 60px 24px; }
+  .card-stage { max-width: 480px; }
+  .face-front { padding: 26px 28px 24px; }
+  .front-mark { width: 92px; height: 92px; }
+  .actions { flex-direction: row; max-width: 480px; }
+  .btn { flex: 1; }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .card { transition: none; }
+  .card-stage, .flip-hint, .actions, .footer { animation: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="card-stage">
+  <div class="card" id="card" role="button" tabindex="0" aria-label="Tik om kaart om te draaien">
+
+    <!-- FRONT -->
+    <div class="card-face face-front">
+      <div class="front-header">
+        <div class="front-name-block">
+          <h1 class="front-name">Maaike<br>van Leuken</h1>
+          <div class="front-role">Founder &amp; Cryptographer</div>
+        </div>
+        <div class="front-mark" aria-hidden="true">
+          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="lattice-front" x="0" y="0" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(45 100 100)">
+                <circle cx="0" cy="0" r="1.3" fill="#4e8a74" fill-opacity=".62"/>
+              </pattern>
+              <clipPath id="clip-front"><rect x="69" y="69" width="62" height="62"/></clipPath>
+            </defs>
+            <rect x="28" y="28" width="144" height="144" fill="none" stroke="#4e8a74" stroke-width="1.5"/>
+            <line x1="17"  y1="28"  x2="28"  y2="28"  stroke="#4e8a74" stroke-width="1.1" stroke-opacity=".65"/>
+            <line x1="28"  y1="17"  x2="28"  y2="28"  stroke="#4e8a74" stroke-width="1.1" stroke-opacity=".65"/>
+            <line x1="172" y1="28"  x2="183" y2="28"  stroke="#4e8a74" stroke-width="1.1" stroke-opacity=".65"/>
+            <line x1="172" y1="17"  x2="172" y2="28"  stroke="#4e8a74" stroke-width="1.1" stroke-opacity=".65"/>
+            <line x1="172" y1="172" x2="183" y2="172" stroke="#4e8a74" stroke-width="1.1" stroke-opacity=".65"/>
+            <line x1="172" y1="172" x2="172" y2="183" stroke="#4e8a74" stroke-width="1.1" stroke-opacity=".65"/>
+            <line x1="17"  y1="172" x2="28"  y2="172" stroke="#4e8a74" stroke-width="1.1" stroke-opacity=".65"/>
+            <line x1="28"  y1="172" x2="28"  y2="183" stroke="#4e8a74" stroke-width="1.1" stroke-opacity=".65"/>
+            <rect x="69" y="69" width="62" height="62" fill="url(#lattice-front)" clip-path="url(#clip-front)"/>
+            <rect x="68" y="68" width="64" height="64" fill="none" stroke="#4e8a74" stroke-width=".9" stroke-opacity=".44"/>
+            <line x1="100" y1="68"  x2="100" y2="132" stroke="#4e8a74" stroke-width=".6" stroke-opacity=".28"/>
+            <line x1="68"  y1="100" x2="132" y2="100" stroke="#4e8a74" stroke-width=".6" stroke-opacity=".28"/>
+            <circle cx="100" cy="100" r="6.5" fill="none" stroke="#4e8a74" stroke-width="1" stroke-opacity=".82"/>
+            <circle cx="100" cy="100" r="2.6" fill="#4e8a74"/>
+          </svg>
+        </div>
+      </div>
+
+      <div>
+        <div class="front-divider"></div>
+        <div class="front-info">
+          <div class="info-label">Email</div>
+          <div class="info-value">maaike@irekai.nl</div>
+          <div class="info-label">Phone</div>
+          <div class="info-value">+31 6 223 106 05</div>
+          <div class="info-label">Web</div>
+          <div class="info-value">irekai.nl</div>
+          <div class="info-label">Loc</div>
+          <div class="info-value">Son en Breugel</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BACK -->
+    <div class="card-face face-back">
+      <svg class="back-logo" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <pattern id="lattice-back" x="0" y="0" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(45 100 100)">
+            <circle cx="0" cy="0" r="1.3" fill="#7aad97" fill-opacity=".55"/>
+          </pattern>
+          <clipPath id="clip-back"><rect x="69" y="69" width="62" height="62"/></clipPath>
+        </defs>
+        <rect x="28" y="28" width="144" height="144" fill="none" stroke="#7aad97" stroke-width="1.5"/>
+        <line x1="17"  y1="28"  x2="28"  y2="28"  stroke="#7aad97" stroke-width="1.1" stroke-opacity=".62"/>
+        <line x1="28"  y1="17"  x2="28"  y2="28"  stroke="#7aad97" stroke-width="1.1" stroke-opacity=".62"/>
+        <line x1="172" y1="28"  x2="183" y2="28"  stroke="#7aad97" stroke-width="1.1" stroke-opacity=".62"/>
+        <line x1="172" y1="17"  x2="172" y2="28"  stroke="#7aad97" stroke-width="1.1" stroke-opacity=".62"/>
+        <line x1="172" y1="172" x2="183" y2="172" stroke="#7aad97" stroke-width="1.1" stroke-opacity=".62"/>
+        <line x1="172" y1="172" x2="172" y2="183" stroke="#7aad97" stroke-width="1.1" stroke-opacity=".62"/>
+        <line x1="17"  y1="172" x2="28"  y2="172" stroke="#7aad97" stroke-width="1.1" stroke-opacity=".62"/>
+        <line x1="28"  y1="172" x2="28"  y2="183" stroke="#7aad97" stroke-width="1.1" stroke-opacity=".62"/>
+        <rect x="69" y="69" width="62" height="62" fill="url(#lattice-back)" clip-path="url(#clip-back)"/>
+        <rect x="68" y="68" width="64" height="64" fill="none" stroke="#7aad97" stroke-width=".9" stroke-opacity=".42"/>
+        <line x1="100" y1="68"  x2="100" y2="132" stroke="#7aad97" stroke-width=".6" stroke-opacity=".22"/>
+        <line x1="68"  y1="100" x2="132" y2="100" stroke="#7aad97" stroke-width=".6" stroke-opacity=".22"/>
+        <circle cx="100" cy="100" r="6.5" fill="none" stroke="#7aad97" stroke-width="1" stroke-opacity=".72"/>
+        <circle cx="100" cy="100" r="2.6" fill="#7aad97"/>
+      </svg>
+      <div class="back-wordmark">IREKAI</div>
+      <div class="back-tagline">Clarity first.<br>Migrate with confidence.</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="flip-hint" id="flipHint">Tik om om te draaien</div>
+
+<div class="actions">
+  <a href="https://irekai.nl/maaike/maaike-van-leuken.vcf" download="maaike-van-leuken.vcf" class="btn btn-primary" id="downloadBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+    </svg>
+    Voeg toe aan contacten
+  </a>
+  <button class="btn btn-secondary" id="shareBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="18" cy="5" r="3"/>
+      <circle cx="6" cy="12" r="3"/>
+      <circle cx="18" cy="19" r="3"/>
+      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+      <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+    </svg>
+    Deel deze pagina
+  </button>
+</div>
+
+<div class="footer">irekai.nl / maaike</div>
+
+<div class="toast" id="toast">Link gekopieerd</div>
+
+<script>
+// ============== FLIP CARD ==============
+const card = document.getElementById('card');
+const flipHint = document.getElementById('flipHint');
+let hintHidden = false;
+
+function flipCard() {
+  card.classList.toggle('flipped');
+  if (!hintHidden) {
+    flipHint.style.opacity = '0';
+    hintHidden = true;
+  }
+}
+
+card.addEventListener('click', flipCard);
+card.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    flipCard();
+  }
+});
+
+// ============== SHARE BUTTON ==============
+const shareBtn = document.getElementById('shareBtn');
+const toast = document.getElementById('toast');
+
+function showToast(message) {
+  toast.textContent = message;
+  toast.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+shareBtn.addEventListener('click', async () => {
+  const url = window.location.href;
+  const shareData = {
+    title: 'Maaike van Leuken — IREKAI',
+    text: 'Founder & Cryptographer at IREKAI',
+    url: url
+  };
+
+  if (navigator.share) {
+    try {
+      await navigator.share(shareData);
+    } catch (err) {
+      // User cancelled — silent
+    }
+  } else {
+    try {
+      await navigator.clipboard.writeText(url);
+      showToast('Link gekopieerd');
+    } catch (err) {
+      showToast('Kon link niet kopiëren');
+    }
+  }
+});
+
+// ============== DOWNLOAD FEEDBACK ==============
+document.getElementById('downloadBtn').addEventListener('click', () => {
+  setTimeout(() => showToast('Contactkaart gedownload'), 200);
+});
+</script>
+
+</body>
+</html>
