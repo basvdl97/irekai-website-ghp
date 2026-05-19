@@ -74,8 +74,36 @@ npm run dev          # starts at http://localhost:5173
 
 ---
 
-## Deployment (irekai.nl)
+## Deployment (GitHub Pages, local build)
 
-1. Run `npm run build` → uploads `dist/` to your host
-2. For static hosting (Cloudflare Pages, Netlify, Vercel): just connect the repo and set build command to `npm run build`, output dir to `dist`
-3. The router uses hash history (`/#/about`) for compatibility with any static host — no server config needed
+This project is configured for local deploys to GitHub Pages (no GitHub Actions).
+
+### One-time GitHub setup
+
+1. Push this repository to GitHub.
+2. In GitHub, open **Settings > Pages**.
+3. Under **Build and deployment**:
+  - Source: **Deploy from a branch**
+  - Branch: **gh-pages**
+  - Folder: **/ (root)**
+4. Save.
+
+### Local deploy flow
+
+```bash
+cd irekai-website
+npm install
+npm run deploy
+```
+
+What `npm run deploy` does:
+
+- Runs `npm run build` first (`predeploy` hook)
+- Publishes `dist/` to the `gh-pages` branch
+
+### Notes
+
+- The router uses hash history (`/#/about`), so deep-link refreshes work on GitHub Pages.
+- `base` is configured as `./` in Vite, so built assets stay relative and work from a project pages path.
+- If your default branch is protected, this workflow still works because deployment pushes to `gh-pages`, not to your default branch.
+- Custom domain is controlled by `public/CNAME` (currently `irekai.nl`). Keep exactly one domain per file.
